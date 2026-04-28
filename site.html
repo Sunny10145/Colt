@@ -506,10 +506,7 @@
                 <input type="password" id="password" placeholder="Enter your password">
             </div>
             
-            <button class="login-btn" onclick="handleLogin()">
-                <span id="loginText">Login</span>
-                <span id="loginLoader" style="display: none;"><span class="loader"></span></span>
-            </button>
+            <button class="login-btn" id="loginBtn">Login →</button>
             
             <div id="errorMsg" class="login-error"></div>
             
@@ -554,7 +551,7 @@
                 <div class="sync-status">
                     <div class="sync-dot" id="syncDot"></div>
                     <span id="syncText">Connected to Supabase</span>
-                    <button class="refresh-btn" onclick="loadUsersFromSupabase()"><i class="fas fa-sync-alt"></i></button>
+                    <button class="refresh-btn" onclick="loadUsers()"><i class="fas fa-sync-alt"></i></button>
                 </div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -627,7 +624,7 @@
                             <option value="manager">Manager</option>
                             <option value="admin">Admin</option>
                         </select>
-                        <button class="login-btn" onclick="addNewUser()" style="margin-top: 0;">Add User</button>
+                        <button class="login-btn" onclick="addUser()" style="margin-top: 0;">Add User</button>
                     </div>
                 </div>
                 
@@ -637,7 +634,7 @@
                         <table class="admin-table">
                             <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Dashboard Access</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody id="usersTableBody"></tbody>
-                        <td>
+                        </table>
                     </div>
                     <p style="margin-top: 12px; font-size: 11px; color: var(--text-muted);">
                         <i class="fas fa-info-circle"></i> Click on dashboard badges to edit permissions
@@ -648,454 +645,537 @@
     </div>
 
     <script>
-        // ============= SUPABASE CONFIGURATION =============
-        const SUPABASE_URL = "https://qivpnzbogntgmtubhysu.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_FpnKRZYqc_wtV9uXZxyYog_JU828bVe";
-        
-        // Initialize Supabase client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
-        // Global variables
-        let allUsers = [];
-        let allDashboards = [];
-        let currentUser = null;
-        
-        // ============= SUPABASE CRUD OPERATIONS =============
-        
-        async function loadUsersFromSupabase() {
-            const dot = document.getElementById('syncDot');
-            const text = document.getElementById('syncText');
+        (function() {
+            // ============= SUPABASE CONFIGURATION =============
+            const SUPABASE_URL = "https://qivpnzbogntgmtubhysu.supabase.co";
+            const SUPABASE_ANON_KEY = "sb_publishable_FpnKRZYqc_wtV9uXZxyYog_JU828bVe";
             
-            dot.className = 'sync-dot syncing';
-            text.textContent = 'Loading from Supabase...';
+            // Initialize Supabase client
+            const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             
-            try {
-                const { data: users, error } = await supabase
-                    .from('users')
-                    .select('*')
-                    .eq('is_active', true);
-                
-                if (error) throw error;
-                
-                allUsers = users;
-                localStorage.setItem('colt_users_cache', JSON.stringify(allUsers));
-                
-                dot.className = 'sync-dot';
-                dot.style.background = '#10b981';
-                text.textContent = `✓ Supabase (${allUsers.length} users)`;
-                
-                if (currentUser?.role === 'admin') renderUsersTable();
-                document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
-                
-                return true;
-            } catch (error) {
-                console.error('Supabase error:', error);
-                dot.className = 'sync-dot error';
-                text.textContent = '⚠ Offline mode';
-                
-                const cached = localStorage.getItem('colt_users_cache');
-                if (cached) allUsers = JSON.parse(cached);
-                return false;
-            }
-        }
-        
-        async function loadDashboardsFromSupabase() {
-            try {
-                const { data: dashboards, error } = await supabase
-                    .from('dashboards')
-                    .select('*')
-                    .eq('is_active', true);
-                
-                if (error) throw error;
-                allDashboards = dashboards;
-                return true;
-            } catch (error) {
-                console.error('Error loading dashboards:', error);
-                allDashboards = [
-                    { id: 1, title: "Expense Dashboard", description: "Track expenses", icon: "💰", url: "#", category: "Finance" },
-                    { id: 2, title: "Equipment Tracker", description: "Monitor equipment", icon: "🔧", url: "#", category: "Operations" },
-                    { id: 3, title: "HR Analytics", description: "Employee performance", icon: "👥", url: "#", category: "HR" },
-                    { id: 4, title: "Project Dashboard", description: "Project progress", icon: "📊", url: "#", category: "Projects" },
-                    { id: 5, title: "Inventory Management", description: "Stock levels", icon: "📦", url: "#", category: "Operations" },
-                    { id: 6, title: "Sales Analytics", description: "Revenue performance", icon: "📈", url: "#", category: "Finance" },
-                    { id: 7, title: "Maintenance Report", description: "Maintenance schedule", icon: "🔨", url: "#", category: "Operations" },
-                    { id: 8, title: "Safety Dashboard", description: "Safety compliance", icon: "🛡️", url: "#", category: "Safety" }
-                ];
-                return false;
-            }
-        }
-        
-        async function addNewUser() {
-            const username = document.getElementById('newUsername').value.trim();
-            const name = document.getElementById('newName').value.trim();
-            const password = document.getElementById('newPassword').value.trim();
-            const role = document.getElementById('newRole').value;
+            // Global variables
+            let allUsers = [];
+            let allDashboards = [];
+            let currentUser = null;
             
-            if (!username || !name || !password) {
-                alert('Please fill all fields!');
-                return;
+            // Fallback Dashboards
+            const FALLBACK_DASHBOARDS = [
+                { id: 1, title: "Expense Dashboard", description: "Track expenses", icon: "💰", url: "#", category: "Finance" },
+                { id: 2, title: "Equipment Tracker", description: "Monitor equipment", icon: "🔧", url: "#", category: "Operations" },
+                { id: 3, title: "HR Analytics", description: "Employee performance", icon: "👥", url: "#", category: "HR" },
+                { id: 4, title: "Project Dashboard", description: "Project progress", icon: "📊", url: "#", category: "Projects" },
+                { id: 5, title: "Inventory Management", description: "Stock levels", icon: "📦", url: "#", category: "Operations" },
+                { id: 6, title: "Sales Analytics", description: "Revenue performance", icon: "📈", url: "#", category: "Finance" },
+                { id: 7, title: "Maintenance Report", description: "Maintenance schedule", icon: "🔨", url: "#", category: "Operations" },
+                { id: 8, title: "Safety Dashboard", description: "Safety compliance", icon: "🛡️", url: "#", category: "Safety" }
+            ];
+            
+            // Helper Functions
+            function showLoader(show) {
+                const loginText = document.getElementById('loginText');
+                const loginLoader = document.getElementById('loginLoader');
+                const loginBtn = document.getElementById('loginBtn');
+                if (show) {
+                    if (loginText) loginText.style.display = 'none';
+                    if (loginLoader) loginLoader.style.display = 'inline-block';
+                    if (loginBtn) loginBtn.disabled = true;
+                } else {
+                    if (loginText) loginText.style.display = 'inline';
+                    if (loginLoader) loginLoader.style.display = 'none';
+                    if (loginBtn) loginBtn.disabled = false;
+                }
             }
             
-            if (allUsers.find(u => u.username === username)) {
-                alert('Username already exists!');
-                return;
+            // Load users from Supabase
+            async function loadUsers() {
+                const dot = document.getElementById('syncDot');
+                const text = document.getElementById('syncText');
+                
+                if (dot) dot.className = 'sync-dot syncing';
+                if (text) text.textContent = 'Loading from Supabase...';
+                
+                try {
+                    const { data: users, error } = await supabaseClient
+                        .from('users')
+                        .select('*')
+                        .eq('is_active', true);
+                    
+                    if (error) throw error;
+                    
+                    allUsers = users || [];
+                    localStorage.setItem('colt_users_cache', JSON.stringify(allUsers));
+                    
+                    if (dot) {
+                        dot.className = 'sync-dot';
+                        dot.style.background = '#10b981';
+                    }
+                    if (text) text.textContent = `✓ Supabase (${allUsers.length} users)`;
+                    
+                    if (currentUser?.role === 'admin') renderUsersTable();
+                    const totalUsersElem = document.getElementById('totalUsers');
+                    if (totalUsersElem) totalUsersElem.textContent = allUsers.filter(u => u.is_active).length;
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Supabase error:', error);
+                    if (dot) {
+                        dot.className = 'sync-dot error';
+                    }
+                    if (text) text.textContent = '⚠ Offline mode';
+                    
+                    const cached = localStorage.getItem('colt_users_cache');
+                    if (cached) allUsers = JSON.parse(cached);
+                    return false;
+                }
             }
             
-            const newUser = {
-                username: username,
-                name: name,
-                password: password,
-                role: role,
-                dashboard_ids: [1, 2],
-                is_active: true
-            };
-            
-            try {
-                const { data, error } = await supabase
-                    .from('users')
-                    .insert([newUser])
-                    .select();
-                
-                if (error) throw error;
-                
-                alert('✅ User added successfully to Supabase!');
-                document.getElementById('newUsername').value = '';
-                document.getElementById('newName').value = '';
-                document.getElementById('newPassword').value = '';
-                
-                await loadUsersFromSupabase();
-                if (currentUser?.role === 'admin') renderUsersTable();
-                document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
-                
-            } catch (error) {
-                console.error('Error adding user:', error);
-                alert('❌ Failed to add user: ' + error.message);
+            // Load dashboards from Supabase
+            async function loadDashboards() {
+                try {
+                    const { data: dashboards, error } = await supabaseClient
+                        .from('dashboards')
+                        .select('*')
+                        .eq('is_active', true);
+                    
+                    if (error) throw error;
+                    allDashboards = dashboards || FALLBACK_DASHBOARDS;
+                    return true;
+                } catch (error) {
+                    console.error('Error loading dashboards:', error);
+                    allDashboards = FALLBACK_DASHBOARDS;
+                    return false;
+                }
             }
-        }
-        
-        async function updateUserPermissions(userId, dashboardIds) {
-            try {
-                const { error } = await supabase
-                    .from('users')
-                    .update({ dashboard_ids: dashboardIds, updated_at: new Date() })
-                    .eq('id', userId);
+            
+            // Add new user
+            async function addUser() {
+                const username = document.getElementById('newUsername')?.value.trim() || '';
+                const name = document.getElementById('newName')?.value.trim() || '';
+                const password = document.getElementById('newPassword')?.value.trim() || '';
+                const role = document.getElementById('newRole')?.value || 'employee';
                 
-                if (error) throw error;
-                
-                await loadUsersFromSupabase();
-                
-                if (currentUser && currentUser.id === userId) {
-                    currentUser.dashboard_ids = dashboardIds;
-                    localStorage.setItem('colt_user', JSON.stringify(currentUser));
-                    initDashboard();
+                if (!username || !name || !password) {
+                    alert('Please fill all fields!');
+                    return;
                 }
                 
-                if (currentUser?.role === 'admin') renderUsersTable();
-                alert('✅ Permissions updated successfully!');
+                if (allUsers.find(u => u.username === username)) {
+                    alert('Username already exists!');
+                    return;
+                }
                 
-            } catch (error) {
-                console.error('Error updating permissions:', error);
-                alert('❌ Failed to update permissions: ' + error.message);
-            }
-        }
-        
-        async function toggleUserStatus(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (user && user.username !== 'admin') {
+                const newUser = {
+                    username: username,
+                    name: name,
+                    password: password,
+                    role: role,
+                    dashboard_ids: [1, 2],
+                    is_active: true
+                };
+                
                 try {
-                    const { error } = await supabase
+                    const { data, error } = await supabaseClient
                         .from('users')
-                        .update({ is_active: !user.is_active, updated_at: new Date() })
+                        .insert([newUser])
+                        .select();
+                    
+                    if (error) throw error;
+                    
+                    alert('✅ User added successfully to Supabase!');
+                    const newUsername = document.getElementById('newUsername');
+                    const newName = document.getElementById('newName');
+                    const newPassword = document.getElementById('newPassword');
+                    if (newUsername) newUsername.value = '';
+                    if (newName) newName.value = '';
+                    if (newPassword) newPassword.value = '';
+                    
+                    await loadUsers();
+                    if (currentUser?.role === 'admin') renderUsersTable();
+                    const totalUsersElem = document.getElementById('totalUsers');
+                    if (totalUsersElem) totalUsersElem.textContent = allUsers.filter(u => u.is_active).length;
+                    
+                } catch (error) {
+                    console.error('Error adding user:', error);
+                    alert('❌ Failed to add user: ' + error.message);
+                }
+            }
+            
+            // Update user permissions
+            async function updateUserPermissions(userId, dashboardIds) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('users')
+                        .update({ dashboard_ids: dashboardIds, updated_at: new Date() })
                         .eq('id', userId);
                     
                     if (error) throw error;
                     
-                    await loadUsersFromSupabase();
-                    if (currentUser?.role === 'admin') renderUsersTable();
+                    await loadUsers();
                     
-                    if (currentUser && currentUser.id === userId && !user.is_active) {
-                        logout();
+                    if (currentUser && currentUser.id === userId) {
+                        currentUser.dashboard_ids = dashboardIds;
+                        localStorage.setItem('colt_user', JSON.stringify(currentUser));
+                        initDashboard();
                     }
                     
-                } catch (error) {
-                    console.error('Error toggling status:', error);
-                    alert('❌ Failed to update status: ' + error.message);
-                }
-            }
-        }
-        
-        async function deleteUser(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (user && user.username !== 'admin' && confirm(`Delete ${user.name}? This cannot be undone.`)) {
-                try {
-                    const { error } = await supabase
-                        .from('users')
-                        .delete()
-                        .eq('id', userId);
-                    
-                    if (error) throw error;
-                    
-                    await loadUsersFromSupabase();
                     if (currentUser?.role === 'admin') renderUsersTable();
-                    document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
-                    alert('✅ User deleted successfully!');
+                    alert('✅ Permissions updated successfully!');
                     
                 } catch (error) {
-                    console.error('Error deleting user:', error);
-                    alert('❌ Failed to delete user: ' + error.message);
+                    console.error('Error updating permissions:', error);
+                    alert('❌ Failed to update permissions: ' + error.message);
                 }
             }
-        }
-        
-        // ============= PERMISSION EDITOR MODAL =============
-        function openPermissionEditor(userId) {
-            const user = allUsers.find(u => u.id === userId);
-            if (!user) return;
             
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Edit Permissions: ${user.name}</h3>
-                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
-                    </div>
-                    <div id="permList">
-                        ${allDashboards.map(d => `
-                            <label class="perm-checkbox">
-                                <input type="checkbox" value="${d.id}" ${user.dashboard_ids?.includes(d.id) ? 'checked' : ''}>
-                                <div>
-                                    <strong>${d.icon} ${d.title}</strong>
-                                    <small style="display: block; color: #64748b;">${d.category}</small>
-                                </div>
-                            </label>
-                        `).join('')}
-                    </div>
-                    <div style="margin-top: 20px; display: flex; gap: 10px;">
-                        <button class="login-btn" onclick="savePermissionsFromModal(${userId})">Save Changes</button>
-                        <button class="login-btn" style="background: gray;" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        
-        async function savePermissionsFromModal(userId) {
-            const checkboxes = document.querySelectorAll('#permList input[type="checkbox"]');
-            const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
-            await updateUserPermissions(userId, selectedIds);
-            document.querySelector('.modal-overlay')?.remove();
-        }
-        
-        // ============= RENDER FUNCTIONS =============
-        function renderUsersTable() {
-            const tbody = document.getElementById('usersTableBody');
-            if (!tbody) return;
-            
-            tbody.innerHTML = allUsers.filter(u => u.is_active).map(user => `
-                <tr>
-                    <td style="color: var(--text-primary);">${user.username}</td>
-                    <td style="color: var(--text-primary);">${user.name}</td>
-                    <td style="color: var(--text-primary);">${user.role}</td>
-                    <td>
-                        ${(user.dashboard_ids || [1,2]).map(id => {
-                            const dash = allDashboards.find(d => d.id === id);
-                            return dash ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})" title="Click to edit">${dash.title.substring(0, 12)} 🖊️</span>` : '';
-                        }).join('')}
-                        ${(user.dashboard_ids || []).length === 0 ? '<span class="permission-badge" onclick="openPermissionEditor(' + user.id + ')">+ Add Permissions 🖊️</span>' : ''}
-                    </td>
-                    <td><span class="user-status status-active">Active</span></td>
-                    <td>
-                        <button class="edit-user-btn" onclick="openPermissionEditor(${user.id})" title="Edit Permissions"><i class="fas fa-key"></i></button>
-                        <button class="edit-user-btn" onclick="toggleUserStatus(${user.id})" title="Deactivate"><i class="fas fa-ban"></i></button>
-                        ${user.username !== 'admin' ? `<button class="delete-user-btn" onclick="deleteUser(${user.id})" title="Delete"><i class="fas fa-trash"></i></button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
-        }
-        
-        function getUserDashboards(user) {
-            if (!user) return [];
-            if (user.role === 'admin') return allDashboards;
-            const ids = user.dashboard_ids || [1, 2];
-            return allDashboards.filter(d => ids.includes(d.id));
-        }
-        
-        // ============= LOGIN HANDLER =============
-        async function handleLogin() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const errorDiv = document.getElementById('errorMsg');
-            const loginText = document.getElementById('loginText');
-            const loginLoader = document.getElementById('loginLoader');
-            const loginBtn = document.querySelector('.login-btn');
-            
-            if (!username || !password) {
-                errorDiv.textContent = 'Please enter username and password!';
-                errorDiv.style.display = 'block';
-                return;
-            }
-            
-            loginText.style.display = 'none';
-            loginLoader.style.display = 'inline-block';
-            loginBtn.disabled = true;
-            errorDiv.style.display = 'none';
-            
-            await loadUsersFromSupabase();
-            await loadDashboardsFromSupabase();
-            
-            const user = allUsers.find(u => u.username === username && u.password === password && u.is_active);
-            
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('colt_user', JSON.stringify(currentUser));
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboardContainer').style.display = 'block';
-                initDashboard();
-            } else {
-                errorDiv.textContent = 'Invalid username or password!';
-                errorDiv.style.display = 'block';
-            }
-            
-            loginText.style.display = 'inline';
-            loginLoader.style.display = 'none';
-            loginBtn.disabled = false;
-        }
-        
-        function initDashboard() {
-            if (!currentUser) return;
-            document.getElementById('userName').textContent = currentUser.name;
-            document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
-            document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
-            document.getElementById('greeting').innerHTML = `👋 Welcome, ${currentUser.name}`;
-            document.getElementById('adminNavItem').style.display = currentUser.role === 'admin' ? 'flex' : 'none';
-            document.getElementById('lastLogin').textContent = new Date().toLocaleDateString();
-            
-            const userDashboards = getUserDashboards(currentUser);
-            document.getElementById('totalDashboards').textContent = userDashboards.length;
-            document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
-            
-            document.getElementById('userDashboardsGrid').innerHTML = userDashboards.map(d => `
-                <a href="${d.url}" class="dash-card" target="_blank">
-                    <div class="dash-icon">${d.icon}</div>
-                    <h3>${d.title}</h3>
-                    <p>${d.description}</p>
-                    <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
-                </a>
-            `).join('');
-            
-            document.getElementById('allDashboardsGrid').innerHTML = allDashboards.map(d => `
-                <div class="dash-card">
-                    <div class="dash-icon">${d.icon}</div>
-                    <h3>${d.title}</h3>
-                    <p>${d.description}</p>
-                    <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
-                </div>
-            `).join('');
-            
-            if (currentUser.role === 'admin') renderUsersTable();
-        }
-        
-        // ============= UI FUNCTIONS =============
-        function initTheme() {
-            // Default theme light rakhte hain
-            const savedTheme = localStorage.getItem('colt_theme') || 'light';
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark');
-            }
-            const icon = document.getElementById('themeIcon');
-            if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-        
-        function toggleTheme() {
-            const isDark = document.body.classList.contains('dark');
-            const newTheme = isDark ? 'light' : 'dark';
-            if (isDark) {
-                document.body.classList.remove('dark');
-            } else {
-                document.body.classList.add('dark');
-            }
-            localStorage.setItem('colt_theme', newTheme);
-            const icon = document.getElementById('themeIcon');
-            if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-        
-        function showPage(page) {
-            document.getElementById('dashboardPage').style.display = 'none';
-            document.getElementById('allDashboardsPage').style.display = 'none';
-            document.getElementById('adminPage').style.display = 'none';
-            
-            if (page === 'dashboard') {
-                document.getElementById('dashboardPage').style.display = 'block';
-                document.getElementById('pageTitle').textContent = 'Dashboard';
-                document.getElementById('pageSubtitle').textContent = 'Your personalized dashboard overview.';
-            } else if (page === 'dashboards') {
-                document.getElementById('allDashboardsPage').style.display = 'block';
-                document.getElementById('pageTitle').textContent = 'All Dashboards';
-                document.getElementById('pageSubtitle').textContent = 'Complete list of available dashboards.';
-            } else if (page === 'admin') {
-                document.getElementById('adminPage').style.display = 'block';
-                document.getElementById('pageTitle').textContent = 'Admin Panel';
-                document.getElementById('pageSubtitle').textContent = 'Manage users and dashboard permissions.';
-                if (currentUser?.role === 'admin') renderUsersTable();
-            }
-            
-            document.querySelectorAll('.nav-item').forEach((item, i) => {
-                item.classList.remove('active');
-                if ((page === 'dashboard' && i === 0) || (page === 'dashboards' && i === 1) || (page === 'admin' && i === 2)) {
-                    item.classList.add('active');
+            // Toggle user status
+            async function toggleUserStatus(userId) {
+                const user = allUsers.find(u => u.id === userId);
+                if (user && user.username !== 'admin') {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('users')
+                            .update({ is_active: !user.is_active, updated_at: new Date() })
+                            .eq('id', userId);
+                        
+                        if (error) throw error;
+                        
+                        await loadUsers();
+                        if (currentUser?.role === 'admin') renderUsersTable();
+                        
+                        if (currentUser && currentUser.id === userId && !user.is_active) {
+                            logout();
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error toggling status:', error);
+                        alert('❌ Failed to update status: ' + error.message);
+                    }
                 }
-            });
-            if (window.innerWidth <= 768) document.getElementById('sidebar')?.classList.remove('open');
-        }
-        
-        function toggleSidebar() { document.getElementById('sidebar')?.classList.toggle('open'); }
-        
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('colt_user');
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('dashboardContainer').style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-        }
-        
-        document.getElementById('password')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
-        
-        async function checkSession() {
-            await loadDashboardsFromSupabase();
+            }
             
-            const savedUser = localStorage.getItem('colt_user');
-            if (savedUser) {
-                await loadUsersFromSupabase();
-                currentUser = JSON.parse(savedUser);
-                const validUser = allUsers.find(u => u.id === currentUser.id && u.is_active);
-                if (validUser) {
-                    currentUser = validUser;
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('dashboardContainer').style.display = 'block';
+            // Delete user
+            async function deleteUser(userId) {
+                const user = allUsers.find(u => u.id === userId);
+                if (user && user.username !== 'admin' && confirm(`Delete ${user.name}? This cannot be undone.`)) {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('users')
+                            .delete()
+                            .eq('id', userId);
+                        
+                        if (error) throw error;
+                        
+                        await loadUsers();
+                        if (currentUser?.role === 'admin') renderUsersTable();
+                        const totalUsersElem = document.getElementById('totalUsers');
+                        if (totalUsersElem) totalUsersElem.textContent = allUsers.filter(u => u.is_active).length;
+                        alert('✅ User deleted successfully!');
+                        
+                    } catch (error) {
+                        console.error('Error deleting user:', error);
+                        alert('❌ Failed to delete user: ' + error.message);
+                    }
+                }
+            }
+            
+            // Open permission editor modal
+            function openPermissionEditor(userId) {
+                const user = allUsers.find(u => u.id === userId);
+                if (!user) return;
+                
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Edit Permissions: ${user.name}</h3>
+                            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                        </div>
+                        <div id="permList">
+                            ${allDashboards.map(d => `
+                                <label class="perm-checkbox">
+                                    <input type="checkbox" value="${d.id}" ${user.dashboard_ids?.includes(d.id) ? 'checked' : ''}>
+                                    <div>
+                                        <strong>${d.icon} ${d.title}</strong>
+                                        <small style="display: block; color: #64748b;">${d.category}</small>
+                                    </div>
+                                </label>
+                            `).join('')}
+                        </div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <button class="login-btn" onclick="savePermissions(${userId})">Save Changes</button>
+                            <button class="login-btn" style="background: gray;" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+            
+            async function savePermissions(userId) {
+                const checkboxes = document.querySelectorAll('#permList input[type="checkbox"]');
+                const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+                await updateUserPermissions(userId, selectedIds);
+                const modal = document.querySelector('.modal-overlay');
+                if (modal) modal.remove();
+            }
+            
+            // Render users table
+            function renderUsersTable() {
+                const tbody = document.getElementById('usersTableBody');
+                if (!tbody) return;
+                
+                tbody.innerHTML = allUsers.filter(u => u.is_active).map(user => `
+                    <tr>
+                        <td style="color: var(--text-primary);">${user.username}</td>
+                        <td style="color: var(--text-primary);">${user.name}</td>
+                        <td style="color: var(--text-primary);">${user.role}</td>
+                        <td>
+                            ${(user.dashboard_ids || [1,2]).map(id => {
+                                const dash = allDashboards.find(d => d.id === id);
+                                return dash ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})" title="Click to edit">${dash.title.substring(0, 12)} 🖊️</span>` : '';
+                            }).join('')}
+                            ${(user.dashboard_ids || []).length === 0 ? '<span class="permission-badge" onclick="openPermissionEditor(' + user.id + ')">+ Add Permissions 🖊️</span>' : ''}
+                        </td>
+                        <td><span class="user-status status-active">Active</span></td>
+                        <td>
+                            <button class="edit-user-btn" onclick="openPermissionEditor(${user.id})" title="Edit Permissions"><i class="fas fa-key"></i></button>
+                            <button class="edit-user-btn" onclick="toggleUserStatus(${user.id})" title="Deactivate"><i class="fas fa-ban"></i></button>
+                            ${user.username !== 'admin' ? `<button class="delete-user-btn" onclick="deleteUser(${user.id})" title="Delete"><i class="fas fa-trash"></i></button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            function getUserDashboards(user) {
+                if (!user) return [];
+                if (user.role === 'admin') return allDashboards;
+                const ids = user.dashboard_ids || [1, 2];
+                return allDashboards.filter(d => ids.includes(d.id));
+            }
+            
+            // Login handler
+            async function handleLogin() {
+                const username = document.getElementById('username')?.value.trim() || '';
+                const password = document.getElementById('password')?.value.trim() || '';
+                const errorDiv = document.getElementById('errorMsg');
+                
+                if (!username || !password) {
+                    if (errorDiv) {
+                        errorDiv.textContent = 'Please enter username and password!';
+                        errorDiv.style.display = 'block';
+                    }
+                    return;
+                }
+                
+                showLoader(true);
+                if (errorDiv) errorDiv.style.display = 'none';
+                
+                await loadUsers();
+                await loadDashboards();
+                
+                const user = allUsers.find(u => u.username === username && u.password === password && u.is_active);
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('colt_user', JSON.stringify(currentUser));
+                    const loginContainer = document.getElementById('loginContainer');
+                    const dashboardContainer = document.getElementById('dashboardContainer');
+                    if (loginContainer) loginContainer.style.display = 'none';
+                    if (dashboardContainer) dashboardContainer.style.display = 'block';
                     initDashboard();
                 } else {
-                    localStorage.removeItem('colt_user');
+                    if (errorDiv) {
+                        errorDiv.textContent = 'Invalid username or password!';
+                        errorDiv.style.display = 'block';
+                    }
+                }
+                
+                showLoader(false);
+            }
+            
+            function initDashboard() {
+                if (!currentUser) return;
+                const userNameElem = document.getElementById('userName');
+                const userRoleElem = document.getElementById('userRole');
+                const userAvatarElem = document.getElementById('userAvatar');
+                const greetingElem = document.getElementById('greeting');
+                const adminNavItem = document.getElementById('adminNavItem');
+                const lastLoginElem = document.getElementById('lastLogin');
+                
+                if (userNameElem) userNameElem.textContent = currentUser.name;
+                if (userRoleElem) userRoleElem.textContent = currentUser.role.toUpperCase();
+                if (userAvatarElem) userAvatarElem.textContent = currentUser.name.charAt(0);
+                if (greetingElem) greetingElem.innerHTML = `👋 Welcome, ${currentUser.name}`;
+                if (adminNavItem) adminNavItem.style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+                if (lastLoginElem) lastLoginElem.textContent = new Date().toLocaleDateString();
+                
+                const userDashboards = getUserDashboards(currentUser);
+                const totalDashboardsElem = document.getElementById('totalDashboards');
+                const totalUsersElem = document.getElementById('totalUsers');
+                
+                if (totalDashboardsElem) totalDashboardsElem.textContent = userDashboards.length;
+                if (totalUsersElem) totalUsersElem.textContent = allUsers.filter(u => u.is_active).length;
+                
+                const userGrid = document.getElementById('userDashboardsGrid');
+                const allGrid = document.getElementById('allDashboardsGrid');
+                
+                if (userGrid) {
+                    userGrid.innerHTML = userDashboards.map(d => `
+                        <a href="${d.url}" class="dash-card" target="_blank">
+                            <div class="dash-icon">${d.icon}</div>
+                            <h3>${d.title}</h3>
+                            <p>${d.description}</p>
+                            <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
+                        </a>
+                    `).join('');
+                }
+                
+                if (allGrid) {
+                    allGrid.innerHTML = allDashboards.map(d => `
+                        <div class="dash-card">
+                            <div class="dash-icon">${d.icon}</div>
+                            <h3>${d.title}</h3>
+                            <p>${d.description}</p>
+                            <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
+                        </div>
+                    `).join('');
+                }
+                
+                if (currentUser.role === 'admin') renderUsersTable();
+            }
+            
+            // UI Functions
+            function initTheme() {
+                const savedTheme = localStorage.getItem('colt_theme') || 'light';
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark');
+                }
+                const icon = document.getElementById('themeIcon');
+                if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            
+            function toggleTheme() {
+                const isDark = document.body.classList.contains('dark');
+                const newTheme = isDark ? 'light' : 'dark';
+                if (isDark) {
+                    document.body.classList.remove('dark');
+                } else {
+                    document.body.classList.add('dark');
+                }
+                localStorage.setItem('colt_theme', newTheme);
+                const icon = document.getElementById('themeIcon');
+                if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            
+            function showPage(page) {
+                const dashboardPage = document.getElementById('dashboardPage');
+                const allDashboardsPage = document.getElementById('allDashboardsPage');
+                const adminPage = document.getElementById('adminPage');
+                const pageTitle = document.getElementById('pageTitle');
+                const pageSubtitle = document.getElementById('pageSubtitle');
+                
+                if (dashboardPage) dashboardPage.style.display = 'none';
+                if (allDashboardsPage) allDashboardsPage.style.display = 'none';
+                if (adminPage) adminPage.style.display = 'none';
+                
+                if (page === 'dashboard') {
+                    if (dashboardPage) dashboardPage.style.display = 'block';
+                    if (pageTitle) pageTitle.textContent = 'Dashboard';
+                    if (pageSubtitle) pageSubtitle.textContent = 'Your personalized dashboard overview.';
+                } else if (page === 'dashboards') {
+                    if (allDashboardsPage) allDashboardsPage.style.display = 'block';
+                    if (pageTitle) pageTitle.textContent = 'All Dashboards';
+                    if (pageSubtitle) pageSubtitle.textContent = 'Complete list of available dashboards.';
+                } else if (page === 'admin') {
+                    if (adminPage) adminPage.style.display = 'block';
+                    if (pageTitle) pageTitle.textContent = 'Admin Panel';
+                    if (pageSubtitle) pageSubtitle.textContent = 'Manage users and dashboard permissions.';
+                    if (currentUser?.role === 'admin') renderUsersTable();
+                }
+                
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach((item, i) => {
+                    item.classList.remove('active');
+                    if ((page === 'dashboard' && i === 0) || (page === 'dashboards' && i === 1) || (page === 'admin' && i === 2)) {
+                        item.classList.add('active');
+                    }
+                });
+                
+                const sidebar = document.getElementById('sidebar');
+                if (window.innerWidth <= 768 && sidebar) sidebar.classList.remove('open');
+            }
+            
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar) sidebar.classList.toggle('open');
+            }
+            
+            function logout() {
+                currentUser = null;
+                localStorage.removeItem('colt_user');
+                const loginContainer = document.getElementById('loginContainer');
+                const dashboardContainer = document.getElementById('dashboardContainer');
+                const usernameInput = document.getElementById('username');
+                const passwordInput = document.getElementById('password');
+                
+                if (loginContainer) loginContainer.style.display = 'flex';
+                if (dashboardContainer) dashboardContainer.style.display = 'none';
+                if (usernameInput) usernameInput.value = '';
+                if (passwordInput) passwordInput.value = '';
+            }
+            
+            // Password enter key
+            const passwordInput = document.getElementById('password');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
+            
+            // Login button click
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.onclick = handleLogin;
+            }
+            
+            // Check session
+            async function checkSession() {
+                await loadDashboards();
+                
+                const savedUser = localStorage.getItem('colt_user');
+                if (savedUser) {
+                    await loadUsers();
+                    currentUser = JSON.parse(savedUser);
+                    const validUser = allUsers.find(u => u.id === currentUser.id && u.is_active);
+                    if (validUser) {
+                        currentUser = validUser;
+                        const loginContainer = document.getElementById('loginContainer');
+                        const dashboardContainer = document.getElementById('dashboardContainer');
+                        if (loginContainer) loginContainer.style.display = 'none';
+                        if (dashboardContainer) dashboardContainer.style.display = 'block';
+                        initDashboard();
+                    } else {
+                        localStorage.removeItem('colt_user');
+                    }
                 }
             }
-        }
-        
-        // Make functions global
-        window.handleLogin = handleLogin;
-        window.toggleTheme = toggleTheme;
-        window.showPage = showPage;
-        window.toggleSidebar = toggleSidebar;
-        window.logout = logout;
-        window.loadUsersFromSupabase = loadUsersFromSupabase;
-        window.addNewUser = addNewUser;
-        window.toggleUserStatus = toggleUserStatus;
-        window.deleteUser = deleteUser;
-        window.openPermissionEditor = openPermissionEditor;
-        window.savePermissionsFromModal = savePermissionsFromModal;
-        
-        initTheme();
-        checkSession();
+            
+            // Make functions global
+            window.toggleTheme = toggleTheme;
+            window.showPage = showPage;
+            window.toggleSidebar = toggleSidebar;
+            window.logout = logout;
+            window.loadUsers = loadUsers;
+            window.addUser = addUser;
+            window.toggleUserStatus = toggleUserStatus;
+            window.deleteUser = deleteUser;
+            window.openPermissionEditor = openPermissionEditor;
+            window.savePermissions = savePermissions;
+            window.handleLogin = handleLogin;
+            
+            initTheme();
+            checkSession();
+        })();
     </script>
 </body>
 </html>
