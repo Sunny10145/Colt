@@ -20,9 +20,11 @@
             --info: #3b82f6;
         }
         
-        body { font-family: 'Inter', sans-serif; transition: all 0.3s; min-height: 100vh; }
-        
-        body.light {
+        /* LIGHT THEME (DEFAULT) */
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            min-height: 100vh;
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
             --text-primary: #0f172a;
@@ -35,6 +37,7 @@
             --shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         
+        /* DARK THEME */
         body.dark {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -56,7 +59,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         .login-card {
@@ -148,7 +151,7 @@
         
         .sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
         .sidebar-logo i { font-size: 32px; color: var(--primary); }
-        .sidebar-logo h2 { font-size: 20px; font-weight: 800; }
+        .sidebar-logo h2 { font-size: 20px; font-weight: 800; color: var(--text-primary); }
         .sidebar-logo p { font-size: 10px; color: var(--text-secondary); }
         
         .nav-item {
@@ -187,7 +190,7 @@
             gap: 16px;
         }
         
-        .page-title h1 { font-size: 28px; font-weight: 800; }
+        .page-title h1 { font-size: 28px; font-weight: 800; color: var(--text-primary); }
         .page-title p { color: var(--text-secondary); margin-top: 4px; }
         
         .user-menu {
@@ -230,7 +233,7 @@
         
         .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .stat-header i { font-size: 32px; color: var(--primary); }
-        .stat-value { font-size: 32px; font-weight: 800; margin-bottom: 4px; }
+        .stat-value { font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
         
         .dashboard-grid {
             display: grid;
@@ -263,7 +266,7 @@
             font-size: 24px;
             margin-bottom: 16px;
         }
-        .dash-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .dash-card h3 { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
         .dash-card p { color: var(--text-secondary); font-size: 13px; margin-bottom: 16px; }
         
         .dash-tags { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -296,9 +299,11 @@
             margin-bottom: 24px;
         }
         
+        .admin-card h3 { color: var(--text-primary); margin-bottom: 16px; }
+        
         .admin-table { width: 100%; border-collapse: collapse; }
-        .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        .admin-table th { background: var(--bg-secondary); font-weight: 600; }
+        .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+        .admin-table th { background: var(--bg-secondary); font-weight: 600; color: var(--text-secondary); }
         
         .user-status {
             display: inline-block;
@@ -316,6 +321,7 @@
             cursor: pointer;
             padding: 6px 10px;
             border-radius: 6px;
+            font-size: 14px;
         }
         .edit-user-btn { color: var(--info); }
         .edit-user-btn:hover { background: rgba(59, 130, 246, 0.2); }
@@ -359,6 +365,7 @@
             padding: 10px;
             border-radius: 10px;
             cursor: pointer;
+            color: var(--text-primary);
         }
         
         .sync-status {
@@ -430,6 +437,9 @@
             border: 1px solid var(--border);
         }
         
+        .welcome-section h2 { color: var(--text-primary); margin-bottom: 8px; }
+        .welcome-section p { color: var(--text-secondary); }
+        
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -457,6 +467,7 @@
             align-items: center;
             margin-bottom: 20px;
         }
+        .modal-header h3 { color: var(--text-primary); }
         .modal-close {
             background: none;
             border: none;
@@ -472,6 +483,7 @@
             padding: 8px;
             border-radius: 8px;
             background: var(--bg-secondary);
+            color: var(--text-primary);
         }
     </style>
 </head>
@@ -535,7 +547,7 @@
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                     <div class="user-avatar" id="userAvatar">A</div>
                     <div>
-                        <div style="font-weight: 700;" id="userName">User</div>
+                        <div style="font-weight: 700; color: var(--text-primary);" id="userName">User</div>
                         <div style="font-size: 11px; color: var(--text-secondary);" id="userRole">Role</div>
                     </div>
                 </div>
@@ -557,7 +569,7 @@
                     <p id="pageSubtitle">Welcome back! Here's your overview.</p>
                 </div>
                 <div class="user-menu">
-                    <span id="greeting"></span>
+                    <span id="greeting" style="color: var(--text-primary);"></span>
                     <button class="theme-toggle" onclick="toggleTheme()">
                         <i class="fas fa-moon" id="themeIcon"></i>
                     </button>
@@ -576,36 +588,36 @@
                             <div class="stat-value" id="totalDashboards">0</div>
                             <i class="fas fa-th-large"></i>
                         </div>
-                        <div>Your Dashboards</div>
+                        <div style="color: var(--text-secondary);">Your Dashboards</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-value" id="totalUsers">0</div>
                             <i class="fas fa-users"></i>
                         </div>
-                        <div>Active Users</div>
+                        <div style="color: var(--text-secondary);">Active Users</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-header">
                             <div class="stat-value" id="lastLogin">Today</div>
                             <i class="fas fa-clock"></i>
                         </div>
-                        <div>Last Login</div>
+                        <div style="color: var(--text-secondary);">Last Login</div>
                     </div>
                 </div>
                 
-                <h2 style="margin-bottom: 16px;">📊 Your Dashboards</h2>
+                <h2 style="margin-bottom: 16px; color: var(--text-primary);">📊 Your Dashboards</h2>
                 <div class="dashboard-grid" id="userDashboardsGrid"></div>
             </div>
 
             <div id="allDashboardsPage" style="display: none;">
-                <h2 style="margin-bottom: 16px;">📋 All Available Dashboards</h2>
+                <h2 style="margin-bottom: 16px; color: var(--text-primary);">📋 All Available Dashboards</h2>
                 <div class="dashboard-grid" id="allDashboardsGrid"></div>
             </div>
             
             <div id="adminPage" style="display: none;">
                 <div class="admin-card">
-                    <h3 style="margin-bottom: 16px;"><i class="fas fa-user-plus"></i> Add New User</h3>
+                    <h3><i class="fas fa-user-plus"></i> Add New User</h3>
                     <div class="add-user-form">
                         <input type="text" id="newUsername" placeholder="Username">
                         <input type="text" id="newName" placeholder="Full Name">
@@ -620,12 +632,12 @@
                 </div>
                 
                 <div class="admin-card">
-                    <h3 style="margin-bottom: 16px;"><i class="fas fa-users"></i> Manage Users & Permissions</h3>
+                    <h3><i class="fas fa-users"></i> Manage Users & Permissions</h3>
                     <div style="overflow-x: auto;">
                         <table class="admin-table">
                             <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Dashboard Access</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody id="usersTableBody"></tbody>
-                        </table>
+                        <td>
                     </div>
                     <p style="margin-top: 12px; font-size: 11px; color: var(--text-muted);">
                         <i class="fas fa-info-circle"></i> Click on dashboard badges to edit permissions
@@ -637,7 +649,6 @@
 
     <script>
         // ============= SUPABASE CONFIGURATION =============
-        // 🔴 YAHAN APNA SUPABASE URL & KEY DAALEIN 🔴
         const SUPABASE_URL = "https://qivpnzbogntgmtubhysu.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_FpnKRZYqc_wtV9uXZxyYog_JU828bVe";
         
@@ -651,7 +662,6 @@
         
         // ============= SUPABASE CRUD OPERATIONS =============
         
-        // Load users from Supabase
         async function loadUsersFromSupabase() {
             const dot = document.getElementById('syncDot');
             const text = document.getElementById('syncText');
@@ -671,7 +681,7 @@
                 localStorage.setItem('colt_users_cache', JSON.stringify(allUsers));
                 
                 dot.className = 'sync-dot';
-                dot.style.background = 'var(--success)';
+                dot.style.background = '#10b981';
                 text.textContent = `✓ Supabase (${allUsers.length} users)`;
                 
                 if (currentUser?.role === 'admin') renderUsersTable();
@@ -689,7 +699,6 @@
             }
         }
         
-        // Load dashboards from Supabase
         async function loadDashboardsFromSupabase() {
             try {
                 const { data: dashboards, error } = await supabase
@@ -702,7 +711,6 @@
                 return true;
             } catch (error) {
                 console.error('Error loading dashboards:', error);
-                // Fallback dashboards
                 allDashboards = [
                     { id: 1, title: "Expense Dashboard", description: "Track expenses", icon: "💰", url: "#", category: "Finance" },
                     { id: 2, title: "Equipment Tracker", description: "Monitor equipment", icon: "🔧", url: "#", category: "Operations" },
@@ -717,7 +725,6 @@
             }
         }
         
-        // Add new user to Supabase
         async function addNewUser() {
             const username = document.getElementById('newUsername').value.trim();
             const name = document.getElementById('newName').value.trim();
@@ -766,7 +773,6 @@
             }
         }
         
-        // Update user permissions
         async function updateUserPermissions(userId, dashboardIds) {
             try {
                 const { error } = await supabase
@@ -793,7 +799,6 @@
             }
         }
         
-        // Toggle user status
         async function toggleUserStatus(userId) {
             const user = allUsers.find(u => u.id === userId);
             if (user && user.username !== 'admin') {
@@ -819,7 +824,6 @@
             }
         }
         
-        // Delete user
         async function deleteUser(userId) {
             const user = allUsers.find(u => u.id === userId);
             if (user && user.username !== 'admin' && confirm(`Delete ${user.name}? This cannot be undone.`)) {
@@ -862,7 +866,7 @@
                                 <input type="checkbox" value="${d.id}" ${user.dashboard_ids?.includes(d.id) ? 'checked' : ''}>
                                 <div>
                                     <strong>${d.icon} ${d.title}</strong>
-                                    <small style="display: block; color: var(--text-muted);">${d.category}</small>
+                                    <small style="display: block; color: #64748b;">${d.category}</small>
                                 </div>
                             </label>
                         `).join('')}
@@ -890,9 +894,9 @@
             
             tbody.innerHTML = allUsers.filter(u => u.is_active).map(user => `
                 <tr>
-                    <td>${user.username}</td
-                    <td>${user.name}</td
-                    <td>${user.role}</td
+                    <td style="color: var(--text-primary);">${user.username}</td>
+                    <td style="color: var(--text-primary);">${user.name}</td>
+                    <td style="color: var(--text-primary);">${user.role}</td>
                     <td>
                         ${(user.dashboard_ids || [1,2]).map(id => {
                             const dash = allDashboards.find(d => d.id === id);
@@ -994,8 +998,11 @@
         
         // ============= UI FUNCTIONS =============
         function initTheme() {
-            const savedTheme = localStorage.getItem('colt_theme') || 'dark';
-            document.body.classList.add(savedTheme);
+            // Default theme light rakhte hain
+            const savedTheme = localStorage.getItem('colt_theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark');
+            }
             const icon = document.getElementById('themeIcon');
             if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
@@ -1003,8 +1010,11 @@
         function toggleTheme() {
             const isDark = document.body.classList.contains('dark');
             const newTheme = isDark ? 'light' : 'dark';
-            document.body.classList.remove(isDark ? 'dark' : 'light');
-            document.body.classList.add(newTheme);
+            if (isDark) {
+                document.body.classList.remove('dark');
+            } else {
+                document.body.classList.add('dark');
+            }
             localStorage.setItem('colt_theme', newTheme);
             const icon = document.getElementById('themeIcon');
             if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
