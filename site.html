@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COLT Equipment | Google Sheets Powered Portal</title>
+    <title>COLT Equipment | Supabase Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -377,6 +378,7 @@
         }
         .sync-dot.error { background: var(--danger); }
         .sync-dot.syncing { background: var(--warning); animation: pulse 1s infinite; }
+        
         @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
         
         .refresh-btn {
@@ -428,7 +430,6 @@
             border: 1px solid var(--border);
         }
         
-        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -501,7 +502,7 @@
             <div id="errorMsg" class="login-error"></div>
             
             <div style="margin-top: 20px; text-align: center; font-size: 12px; color: var(--text-muted);">
-                <p>🔐 Demo Credentials (Fallback Mode):</p>
+                <p>🔐 Demo Credentials:</p>
                 <p><strong>admin</strong> / admin123 &nbsp;|&nbsp; <strong>manager</strong> / manager123</p>
                 <p><strong>employee1</strong> / emp123 &nbsp;|&nbsp; <strong>employee2</strong> / emp123</p>
             </div>
@@ -540,8 +541,8 @@
                 </div>
                 <div class="sync-status">
                     <div class="sync-dot" id="syncDot"></div>
-                    <span id="syncText">Connecting to Google Sheets...</span>
-                    <button class="refresh-btn" onclick="syncWithGoogleSheets()"><i class="fas fa-sync-alt"></i></button>
+                    <span id="syncText">Connected to Supabase</span>
+                    <button class="refresh-btn" onclick="loadUsersFromSupabase()"><i class="fas fa-sync-alt"></i></button>
                 </div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -566,7 +567,7 @@
             <div id="dashboardPage">
                 <div class="welcome-section">
                     <h2><i class="fas fa-waveform"></i> COLT Enterprise Portal</h2>
-                    <p>Powered by Google Sheets | Real-time data sync</p>
+                    <p>Powered by Supabase | Enterprise-grade database</p>
                 </div>
                 
                 <div class="stats-grid">
@@ -635,213 +636,216 @@
     </div>
 
     <script>
-        // ═══════════════════════════════════════════════════════════
-        // 🔴 YAHAN APNA GOOGLE SHEETS API URL DAALEIN 🔴
-        // Google Apps Script deploy karne ke baad ye URL yahan paste karein
-        // ═══════════════════════════════════════════════════════════
-        const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_URL/exec";
+        // ============= SUPABASE CONFIGURATION =============
+        // 🔴 YAHAN APNA SUPABASE URL & KEY DAALEIN 🔴
+        const SUPABASE_URL = "https://qivpnzbogntgmtubhysu.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_FpnKRZYqc_wtV9uXZxyYog_JU828bVe";
         
-        // MASTER DASHBOARDS LIST (Complete list with proper URLs)
-        const MASTER_DASHBOARDS = [
-            { id: 1, title: "Expense Dashboard", desc: "Track all company expenses in real-time", icon: "💰", url: "https://script.google.com/macros/s/AKfycbwU5oezEwlUwyiTrDO5yGE6IKIlVTM2vPZe4wLGi3hCXBrD7HfCwndKo1AN-1MFKBVQKQ/exec", category: "Finance" },
-            { id: 2, title: "Equipment Tracker", desc: "Monitor equipment status and maintenance", icon: "🔧", url: "#", category: "Operations" },
-            { id: 3, title: "HR Analytics", desc: "Employee performance and attendance", icon: "👥", url: "#", category: "HR" },
-            { id: 4, title: "Project Dashboard", desc: "Project progress and timeline tracking", icon: "📊", url: "#", category: "Projects" },
-            { id: 5, title: "Inventory Management", desc: "Stock levels and supply chain", icon: "📦", url: "#", category: "Operations" },
-            { id: 6, title: "Sales Analytics", desc: "Revenue and sales performance", icon: "📈", url: "#", category: "Finance" },
-            { id: 7, title: "Maintenance Report", desc: "Equipment maintenance schedule", icon: "🔨", url: "#", category: "Operations" },
-            { id: 8, title: "Safety Dashboard", desc: "Safety incidents and compliance", icon: "🛡️", url: "#", category: "Safety" }
-        ];
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
-        // Fallback Users (Agar Google Sheets fail ho to)
-        const FALLBACK_USERS = [
-            { id: 1, username: "admin", password: "admin123", name: "Administrator", role: "admin", dashboardIds: [1,2,3,4,5,6,7,8], isActive: true },
-            { id: 2, username: "manager", password: "manager123", name: "Operations Manager", role: "manager", dashboardIds: [1,2,4,5,7], isActive: true },
-            { id: 3, username: "employee1", password: "emp123", name: "Rahul Sharma", role: "employee", dashboardIds: [1,2], isActive: true },
-            { id: 4, username: "employee2", password: "emp123", name: "Priya Patel", role: "employee", dashboardIds: [4,5], isActive: true },
-            { id: 5, username: "employee3", password: "emp123", name: "Amit Kumar", role: "employee", dashboardIds: [2,7], isActive: true },
-            { id: 6, username: "employee4", password: "emp123", name: "Neha Gupta", role: "employee", dashboardIds: [1,4,6], isActive: true },
-            { id: 7, username: "employee5", password: "emp123", name: "Vikram Singh", role: "employee", dashboardIds: [3,8], isActive: true }
-        ];
-        
-        let USERS = [];
+        // Global variables
+        let allUsers = [];
+        let allDashboards = [];
         let currentUser = null;
         
-        // ═══════════════════════════════════════════════════════════
-        // GOOGLE SHEETS API CALLS
-        // ═══════════════════════════════════════════════════════════
-        async function callGoogleSheets(action, data = {}) {
-            try {
-                console.log(`📡 Calling Google Sheets API: ${action}`);
-                const response = await fetch(GOOGLE_SHEETS_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: action, data: data })
-                });
-                
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const result = await response.json();
-                console.log(`✅ API Response:`, result);
-                return result;
-            } catch (error) {
-                console.error(`❌ API Error: ${error.message}`);
-                return { success: false, error: error.message };
-            }
-        }
+        // ============= SUPABASE CRUD OPERATIONS =============
         
-        async function syncWithGoogleSheets() {
+        // Load users from Supabase
+        async function loadUsersFromSupabase() {
             const dot = document.getElementById('syncDot');
             const text = document.getElementById('syncText');
             
             dot.className = 'sync-dot syncing';
-            text.textContent = 'Syncing with Google Sheets...';
+            text.textContent = 'Loading from Supabase...';
             
             try {
-                const result = await callGoogleSheets('getUsers');
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('is_active', true);
                 
-                if (result.success && result.users && result.users.length > 0) {
-                    USERS = result.users;
-                    localStorage.setItem('colt_users_cache', JSON.stringify(USERS));
-                    dot.className = 'sync-dot';
-                    dot.style.background = 'var(--success)';
-                    text.textContent = `✓ Connected (${USERS.length} users)`;
-                    console.log('✅ Google Sheets sync successful');
-                    return true;
-                } else {
-                    throw new Error('No users returned from API');
-                }
+                if (error) throw error;
+                
+                allUsers = users;
+                localStorage.setItem('colt_users_cache', JSON.stringify(allUsers));
+                
+                dot.className = 'sync-dot';
+                dot.style.background = 'var(--success)';
+                text.textContent = `✓ Supabase (${allUsers.length} users)`;
+                
+                if (currentUser?.role === 'admin') renderUsersTable();
+                document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
+                
+                return true;
             } catch (error) {
-                console.warn('⚠️ Using fallback data:', error.message);
+                console.error('Supabase error:', error);
                 dot.className = 'sync-dot error';
-                text.textContent = '⚠ Offline mode (using local data)';
+                text.textContent = '⚠ Offline mode';
                 
                 const cached = localStorage.getItem('colt_users_cache');
-                if (cached) {
-                    USERS = JSON.parse(cached);
-                } else {
-                    USERS = JSON.parse(JSON.stringify(FALLBACK_USERS));
-                }
+                if (cached) allUsers = JSON.parse(cached);
                 return false;
             }
         }
         
-        // ═══════════════════════════════════════════════════════════
-        // USER MANAGEMENT FUNCTIONS
-        // ═══════════════════════════════════════════════════════════
+        // Load dashboards from Supabase
+        async function loadDashboardsFromSupabase() {
+            try {
+                const { data: dashboards, error } = await supabase
+                    .from('dashboards')
+                    .select('*')
+                    .eq('is_active', true);
+                
+                if (error) throw error;
+                allDashboards = dashboards;
+                return true;
+            } catch (error) {
+                console.error('Error loading dashboards:', error);
+                // Fallback dashboards
+                allDashboards = [
+                    { id: 1, title: "Expense Dashboard", description: "Track expenses", icon: "💰", url: "#", category: "Finance" },
+                    { id: 2, title: "Equipment Tracker", description: "Monitor equipment", icon: "🔧", url: "#", category: "Operations" },
+                    { id: 3, title: "HR Analytics", description: "Employee performance", icon: "👥", url: "#", category: "HR" },
+                    { id: 4, title: "Project Dashboard", description: "Project progress", icon: "📊", url: "#", category: "Projects" },
+                    { id: 5, title: "Inventory Management", description: "Stock levels", icon: "📦", url: "#", category: "Operations" },
+                    { id: 6, title: "Sales Analytics", description: "Revenue performance", icon: "📈", url: "#", category: "Finance" },
+                    { id: 7, title: "Maintenance Report", description: "Maintenance schedule", icon: "🔨", url: "#", category: "Operations" },
+                    { id: 8, title: "Safety Dashboard", description: "Safety compliance", icon: "🛡️", url: "#", category: "Safety" }
+                ];
+                return false;
+            }
+        }
+        
+        // Add new user to Supabase
         async function addNewUser() {
-            const newUser = {
-                username: document.getElementById('newUsername').value.trim(),
-                name: document.getElementById('newName').value.trim(),
-                password: document.getElementById('newPassword').value.trim(),
-                role: document.getElementById('newRole').value,
-                dashboardIds: [1, 2],
-                isActive: true
-            };
+            const username = document.getElementById('newUsername').value.trim();
+            const name = document.getElementById('newName').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const role = document.getElementById('newRole').value;
             
-            if (!newUser.username || !newUser.name || !newUser.password) {
+            if (!username || !name || !password) {
                 alert('Please fill all fields!');
                 return;
             }
             
-            if (USERS.find(u => u.username === newUser.username)) {
+            if (allUsers.find(u => u.username === username)) {
                 alert('Username already exists!');
                 return;
             }
             
-            const result = await callGoogleSheets('addUser', newUser);
+            const newUser = {
+                username: username,
+                name: name,
+                password: password,
+                role: role,
+                dashboard_ids: [1, 2],
+                is_active: true
+            };
             
-            if (result.success) {
-                alert('✅ User added successfully to Google Sheets!');
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .insert([newUser])
+                    .select();
+                
+                if (error) throw error;
+                
+                alert('✅ User added successfully to Supabase!');
                 document.getElementById('newUsername').value = '';
                 document.getElementById('newName').value = '';
                 document.getElementById('newPassword').value = '';
-                await syncWithGoogleSheets();
+                
+                await loadUsersFromSupabase();
                 if (currentUser?.role === 'admin') renderUsersTable();
-                document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
-            } else {
-                // Fallback: add locally
-                const newId = Math.max(...USERS.map(u => u.id), 0) + 1;
-                USERS.push({ ...newUser, id: newId });
-                renderUsersTable();
-                document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
-                alert('⚠️ User added locally (Google Sheets sync failed)');
+                document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
+                
+            } catch (error) {
+                console.error('Error adding user:', error);
+                alert('❌ Failed to add user: ' + error.message);
             }
         }
         
+        // Update user permissions
         async function updateUserPermissions(userId, dashboardIds) {
-            const result = await callGoogleSheets('updateUser', { id: userId, dashboardIds: dashboardIds });
-            
-            if (result.success) {
-                await syncWithGoogleSheets();
+            try {
+                const { error } = await supabase
+                    .from('users')
+                    .update({ dashboard_ids: dashboardIds, updated_at: new Date() })
+                    .eq('id', userId);
+                
+                if (error) throw error;
+                
+                await loadUsersFromSupabase();
+                
                 if (currentUser && currentUser.id === userId) {
-                    currentUser.dashboardIds = dashboardIds;
+                    currentUser.dashboard_ids = dashboardIds;
                     localStorage.setItem('colt_user', JSON.stringify(currentUser));
                     initDashboard();
                 }
+                
                 if (currentUser?.role === 'admin') renderUsersTable();
                 alert('✅ Permissions updated successfully!');
-            } else {
-                // Fallback: update locally
-                const userIndex = USERS.findIndex(u => u.id === userId);
-                if (userIndex !== -1) {
-                    USERS[userIndex].dashboardIds = dashboardIds;
-                    if (currentUser && currentUser.id === userId) {
-                        currentUser.dashboardIds = dashboardIds;
-                        initDashboard();
-                    }
-                    renderUsersTable();
-                    alert('⚠️ Permissions updated locally (Google Sheets sync failed)');
-                }
+                
+            } catch (error) {
+                console.error('Error updating permissions:', error);
+                alert('❌ Failed to update permissions: ' + error.message);
             }
         }
         
+        // Toggle user status
         async function toggleUserStatus(userId) {
-            const user = USERS.find(u => u.id === userId);
+            const user = allUsers.find(u => u.id === userId);
             if (user && user.username !== 'admin') {
-                const result = await callGoogleSheets('updateUser', { id: userId, isActive: !user.isActive });
-                
-                if (result.success) {
-                    await syncWithGoogleSheets();
-                    if (currentUser && currentUser.id === userId && !user.isActive) logout();
+                try {
+                    const { error } = await supabase
+                        .from('users')
+                        .update({ is_active: !user.is_active, updated_at: new Date() })
+                        .eq('id', userId);
+                    
+                    if (error) throw error;
+                    
+                    await loadUsersFromSupabase();
                     if (currentUser?.role === 'admin') renderUsersTable();
-                } else {
-                    // Fallback
-                    user.isActive = !user.isActive;
-                    renderUsersTable();
-                    if (currentUser && currentUser.id === userId && !user.isActive) logout();
-                }
-                document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
-            }
-        }
-        
-        async function deleteUser(userId) {
-            const user = USERS.find(u => u.id === userId);
-            if (user && user.username !== 'admin' && confirm(`Delete ${user.name}? This action cannot be undone.`)) {
-                const result = await callGoogleSheets('deleteUser', { id: userId });
-                
-                if (result.success) {
-                    await syncWithGoogleSheets();
-                    if (currentUser?.role === 'admin') renderUsersTable();
-                    document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
-                    alert('✅ User deleted successfully!');
-                } else {
-                    // Fallback
-                    const index = USERS.findIndex(u => u.id === userId);
-                    if (index !== -1) {
-                        USERS.splice(index, 1);
-                        renderUsersTable();
-                        document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
-                        alert('⚠️ User deleted locally (Google Sheets sync failed)');
+                    
+                    if (currentUser && currentUser.id === userId && !user.is_active) {
+                        logout();
                     }
+                    
+                } catch (error) {
+                    console.error('Error toggling status:', error);
+                    alert('❌ Failed to update status: ' + error.message);
                 }
             }
         }
         
-        // ═══════════════════════════════════════════════════════════
-        // PERMISSION EDITOR MODAL
-        // ═══════════════════════════════════════════════════════════
+        // Delete user
+        async function deleteUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (user && user.username !== 'admin' && confirm(`Delete ${user.name}? This cannot be undone.`)) {
+                try {
+                    const { error } = await supabase
+                        .from('users')
+                        .delete()
+                        .eq('id', userId);
+                    
+                    if (error) throw error;
+                    
+                    await loadUsersFromSupabase();
+                    if (currentUser?.role === 'admin') renderUsersTable();
+                    document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
+                    alert('✅ User deleted successfully!');
+                    
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    alert('❌ Failed to delete user: ' + error.message);
+                }
+            }
+        }
+        
+        // ============= PERMISSION EDITOR MODAL =============
         function openPermissionEditor(userId) {
-            const user = USERS.find(u => u.id === userId);
+            const user = allUsers.find(u => u.id === userId);
             if (!user) return;
             
             const modal = document.createElement('div');
@@ -853,9 +857,9 @@
                         <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
                     </div>
                     <div id="permList">
-                        ${MASTER_DASHBOARDS.map(d => `
+                        ${allDashboards.map(d => `
                             <label class="perm-checkbox">
-                                <input type="checkbox" value="${d.id}" ${user.dashboardIds?.includes(d.id) ? 'checked' : ''}>
+                                <input type="checkbox" value="${d.id}" ${user.dashboard_ids?.includes(d.id) ? 'checked' : ''}>
                                 <div>
                                     <strong>${d.icon} ${d.title}</strong>
                                     <small style="display: block; color: var(--text-muted);">${d.category}</small>
@@ -879,24 +883,22 @@
             document.querySelector('.modal-overlay')?.remove();
         }
         
-        // ═══════════════════════════════════════════════════════════
-        // RENDER FUNCTIONS
-        // ═══════════════════════════════════════════════════════════
+        // ============= RENDER FUNCTIONS =============
         function renderUsersTable() {
             const tbody = document.getElementById('usersTableBody');
             if (!tbody) return;
             
-            tbody.innerHTML = USERS.filter(u => u.isActive).map(user => `
+            tbody.innerHTML = allUsers.filter(u => u.is_active).map(user => `
                 <tr>
                     <td>${user.username}</td
                     <td>${user.name}</td
                     <td>${user.role}</td
                     <td>
-                        ${(user.dashboardIds || [1,2]).map(id => {
-                            const dash = MASTER_DASHBOARDS.find(d => d.id === id);
+                        ${(user.dashboard_ids || [1,2]).map(id => {
+                            const dash = allDashboards.find(d => d.id === id);
                             return dash ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})" title="Click to edit">${dash.title.substring(0, 12)} 🖊️</span>` : '';
                         }).join('')}
-                        ${(user.dashboardIds || []).length === 0 ? '<span class="permission-badge" onclick="openPermissionEditor(${user.id})">+ Add Permissions 🖊️</span>' : ''}
+                        ${(user.dashboard_ids || []).length === 0 ? '<span class="permission-badge" onclick="openPermissionEditor(' + user.id + ')">+ Add Permissions 🖊️</span>' : ''}
                     </td>
                     <td><span class="user-status status-active">Active</span></td>
                     <td>
@@ -910,28 +912,12 @@
         
         function getUserDashboards(user) {
             if (!user) return [];
-            if (user.role === 'admin') return MASTER_DASHBOARDS;
-            const ids = user.dashboardIds || [1, 2];
-            return MASTER_DASHBOARDS.filter(d => ids.includes(d.id));
+            if (user.role === 'admin') return allDashboards;
+            const ids = user.dashboard_ids || [1, 2];
+            return allDashboards.filter(d => ids.includes(d.id));
         }
         
-        function initTheme() {
-            const savedTheme = localStorage.getItem('colt_theme') || 'dark';
-            document.body.classList.add(savedTheme);
-            const icon = document.getElementById('themeIcon');
-            if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-        
-        function toggleTheme() {
-            const isDark = document.body.classList.contains('dark');
-            const newTheme = isDark ? 'light' : 'dark';
-            document.body.classList.remove(isDark ? 'dark' : 'light');
-            document.body.classList.add(newTheme);
-            localStorage.setItem('colt_theme', newTheme);
-            const icon = document.getElementById('themeIcon');
-            if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-        
+        // ============= LOGIN HANDLER =============
         async function handleLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -951,9 +937,10 @@
             loginBtn.disabled = true;
             errorDiv.style.display = 'none';
             
-            await syncWithGoogleSheets();
+            await loadUsersFromSupabase();
+            await loadDashboardsFromSupabase();
             
-            const user = USERS.find(u => u.username === username && u.password === password && u.isActive);
+            const user = allUsers.find(u => u.username === username && u.password === password && u.is_active);
             
             if (user) {
                 currentUser = user;
@@ -961,7 +948,6 @@
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('dashboardContainer').style.display = 'block';
                 initDashboard();
-                errorDiv.style.display = 'none';
             } else {
                 errorDiv.textContent = 'Invalid username or password!';
                 errorDiv.style.display = 'block';
@@ -983,27 +969,45 @@
             
             const userDashboards = getUserDashboards(currentUser);
             document.getElementById('totalDashboards').textContent = userDashboards.length;
-            document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
+            document.getElementById('totalUsers').textContent = allUsers.filter(u => u.is_active).length;
             
             document.getElementById('userDashboardsGrid').innerHTML = userDashboards.map(d => `
                 <a href="${d.url}" class="dash-card" target="_blank">
                     <div class="dash-icon">${d.icon}</div>
                     <h3>${d.title}</h3>
-                    <p>${d.desc}</p>
+                    <p>${d.description}</p>
                     <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
                 </a>
             `).join('');
             
-            document.getElementById('allDashboardsGrid').innerHTML = MASTER_DASHBOARDS.map(d => `
+            document.getElementById('allDashboardsGrid').innerHTML = allDashboards.map(d => `
                 <div class="dash-card">
                     <div class="dash-icon">${d.icon}</div>
                     <h3>${d.title}</h3>
-                    <p>${d.desc}</p>
+                    <p>${d.description}</p>
                     <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
                 </div>
             `).join('');
             
             if (currentUser.role === 'admin') renderUsersTable();
+        }
+        
+        // ============= UI FUNCTIONS =============
+        function initTheme() {
+            const savedTheme = localStorage.getItem('colt_theme') || 'dark';
+            document.body.classList.add(savedTheme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark');
+            const newTheme = isDark ? 'light' : 'dark';
+            document.body.classList.remove(isDark ? 'dark' : 'light');
+            document.body.classList.add(newTheme);
+            localStorage.setItem('colt_theme', newTheme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
         
         function showPage(page) {
@@ -1049,11 +1053,13 @@
         document.getElementById('password')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
         
         async function checkSession() {
+            await loadDashboardsFromSupabase();
+            
             const savedUser = localStorage.getItem('colt_user');
             if (savedUser) {
-                await syncWithGoogleSheets();
+                await loadUsersFromSupabase();
                 currentUser = JSON.parse(savedUser);
-                const validUser = USERS.find(u => u.id === currentUser.id && u.isActive);
+                const validUser = allUsers.find(u => u.id === currentUser.id && u.is_active);
                 if (validUser) {
                     currentUser = validUser;
                     document.getElementById('loginContainer').style.display = 'none';
@@ -1065,13 +1071,13 @@
             }
         }
         
-        // Make functions global for onclick
+        // Make functions global
         window.handleLogin = handleLogin;
         window.toggleTheme = toggleTheme;
         window.showPage = showPage;
         window.toggleSidebar = toggleSidebar;
         window.logout = logout;
-        window.syncWithGoogleSheets = syncWithGoogleSheets;
+        window.loadUsersFromSupabase = loadUsersFromSupabase;
         window.addNewUser = addNewUser;
         window.toggleUserStatus = toggleUserStatus;
         window.deleteUser = deleteUser;
