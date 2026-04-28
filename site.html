@@ -55,7 +55,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         }
         
         .login-card {
@@ -395,49 +395,6 @@
             margin-bottom: 32px;
             border: 1px solid var(--border);
         }
-        
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            margin-bottom: 12px;
-        }
-        .sync-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-        }
-        .sync-dot.error { background: var(--danger); }
-        
-        .refresh-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-        .refresh-btn:hover { background: var(--bg-secondary); color: var(--primary); }
-        
-        .debug-console {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #0f0;
-            font-family: monospace;
-            font-size: 10px;
-            padding: 8px;
-            border-radius: 8px;
-            z-index: 999;
-            max-width: 300px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -467,9 +424,9 @@
             <div id="errorMsg" class="login-error"></div>
             
             <div style="margin-top: 20px; text-align: center; font-size: 12px; color: var(--text-muted);">
-                <p>Test Credentials:</p>
-                <p>admin / admin123 | manager / manager123</p>
-                <p>employee1 / emp123 | employee2 / emp123</p>
+                <p>🔐 Demo Credentials:</p>
+                <p><strong>admin</strong> / admin123 &nbsp;|&nbsp; <strong>manager</strong> / manager123</p>
+                <p><strong>employee1</strong> / emp123 &nbsp;|&nbsp; <strong>employee2</strong> / emp123</p>
             </div>
         </div>
     </div>
@@ -504,11 +461,6 @@
                         <div style="font-size: 11px; color: var(--text-secondary);" id="userRole">Role</div>
                     </div>
                 </div>
-                <div class="sync-status">
-                    <div class="sync-dot" id="syncDot"></div>
-                    <span id="syncText">Checking connection...</span>
-                    <button class="refresh-btn" onclick="syncWithGoogleSheets()"><i class="fas fa-sync-alt"></i></button>
-                </div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -532,7 +484,7 @@
             <div id="dashboardPage">
                 <div class="welcome-section">
                     <h2><i class="fas fa-waveform"></i> COLT Enterprise Portal</h2>
-                    <p>Real-time data synced with Google Sheets</p>
+                    <p>Your central hub for operational dashboards and analytics</p>
                 </div>
                 
                 <div class="stats-grid">
@@ -570,25 +522,10 @@
             
             <div id="adminPage" style="display: none;">
                 <div class="admin-card">
-                    <h3 style="margin-bottom: 16px;"><i class="fas fa-user-plus"></i> Add New User</h3>
-                    <div class="add-user-form">
-                        <input type="text" id="newUsername" placeholder="Username">
-                        <input type="text" id="newName" placeholder="Full Name">
-                        <input type="password" id="newPassword" placeholder="Password">
-                        <select id="newRole">
-                            <option value="employee">Employee</option>
-                            <option value="manager">Manager</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                        <button class="login-btn" onclick="addNewUser()" style="margin-top: 0;">Add User</button>
-                    </div>
-                </div>
-                
-                <div class="admin-card">
-                    <h3 style="margin-bottom: 16px;"><i class="fas fa-users"></i> Manage Users</h3>
+                    <h3 style="margin-bottom: 16px;"><i class="fas fa-users"></i> User Management</h3>
                     <div style="overflow-x: auto;">
                         <table class="admin-table">
-                            <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Dashboard Access</th><th>Status</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody id="usersTableBody"></tbody>
                         </table>
                     </div>
@@ -598,11 +535,8 @@
     </div>
 
     <script>
-        // 🔴 APNA GOOGLE SHEETS API URL YAHAN DAALEIN 🔴
-        const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbwU5oezEwlUwyiTrDO5yGE6IKIlVTM2vPZe4wLGi3hCXBrD7HfCwndKo1AN-1MFKBVQKQ/exec";
-        
-        // FALLBACK USERS (Agar Google Sheet fetch fail ho to ye use hoga)
-        const FALLBACK_USERS = [
+        // ============= USERS DATABASE =============
+        const USERS_DATA = [
             { id: 1, username: "admin", password: "admin123", name: "Administrator", role: "admin", dashboardIds: [1,2,3,4,5,6,7,8], isActive: true },
             { id: 2, username: "manager", password: "manager123", name: "Operations Manager", role: "manager", dashboardIds: [1,2,4,5,7], isActive: true },
             { id: 3, username: "employee1", password: "emp123", name: "Rahul Sharma", role: "employee", dashboardIds: [1,2], isActive: true },
@@ -623,238 +557,7 @@
             { id: 8, title: "Safety Dashboard", desc: "Safety compliance", icon: "🛡️", url: "#", category: "Safety" }
         ];
         
-        let USERS = [];
         let currentUser = null;
-        
-        // Logging function for debugging
-        function debugLog(message, data) {
-            console.log(`[COLT DEBUG] ${message}`, data || '');
-            const debugDiv = document.getElementById('debugConsole');
-            if (debugDiv) {
-                debugDiv.innerHTML = `<small>${new Date().toLocaleTimeString()}: ${message}</small><br>${debugDiv.innerHTML}`.substring(0, 500);
-            }
-        }
-        
-        async function callGoogleSheets(action, data = {}) {
-            try {
-                debugLog(`Calling Google Sheets API with action: ${action}`);
-                const response = await fetch(GOOGLE_SHEETS_API_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: action, data: data })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                debugLog(`API Response success: ${result.success}`, result);
-                return result;
-            } catch (error) {
-                debugLog(`API Error: ${error.message}`);
-                console.error('API Error:', error);
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function syncWithGoogleSheets() {
-            const dot = document.getElementById('syncDot');
-            const text = document.getElementById('syncText');
-            
-            if (!dot || !text) return;
-            
-            dot.style.background = '#f59e0b';
-            text.textContent = 'Syncing...';
-            
-            try {
-                const result = await callGoogleSheets('getUsers');
-                
-                if (result.success && result.users && result.users.length > 0) {
-                    USERS = result.users;
-                    localStorage.setItem('colt_users_cache', JSON.stringify(USERS));
-                    dot.style.background = '#10b981';
-                    text.textContent = `✓ Connected (${USERS.length} users)`;
-                    debugLog(`Sync successful: ${USERS.length} users loaded`);
-                    return true;
-                } else {
-                    throw new Error(result.error || 'No users returned');
-                }
-            } catch (error) {
-                debugLog(`Sync failed, using fallback data: ${error.message}`);
-                dot.style.background = '#ef4444';
-                text.textContent = '⚠ Using offline mode';
-                
-                // Use fallback data
-                const cached = localStorage.getItem('colt_users_cache');
-                if (cached) {
-                    USERS = JSON.parse(cached);
-                    debugLog(`Using cached data: ${USERS.length} users`);
-                } else {
-                    USERS = [...FALLBACK_USERS];
-                    debugLog(`Using fallback default data: ${USERS.length} users`);
-                }
-                return false;
-            }
-        }
-        
-        async function addNewUser() {
-            const newUser = {
-                username: document.getElementById('newUsername').value.trim(),
-                name: document.getElementById('newName').value.trim(),
-                password: document.getElementById('newPassword').value.trim(),
-                role: document.getElementById('newRole').value,
-                dashboardIds: [1, 2],
-                isActive: true
-            };
-            
-            if (!newUser.username || !newUser.name || !newUser.password) {
-                alert('Please fill all fields!');
-                return;
-            }
-            
-            const result = await callGoogleSheets('addUser', newUser);
-            if (result.success) {
-                alert('User added successfully!');
-                document.getElementById('newUsername').value = '';
-                document.getElementById('newName').value = '';
-                document.getElementById('newPassword').value = '';
-                await syncWithGoogleSheets();
-                renderUsersTable();
-                document.getElementById('totalUsers').textContent = USERS.length;
-            } else {
-                // Fallback: add locally
-                const newId = Math.max(...USERS.map(u => u.id), 0) + 1;
-                USERS.push({ ...newUser, id: newId });
-                renderUsersTable();
-                document.getElementById('totalUsers').textContent = USERS.length;
-                alert('User added locally (offline mode)');
-            }
-        }
-        
-        async function updateUserPermissions(userId, dashboardIds) {
-            const result = await callGoogleSheets('updateUser', { id: userId, dashboardIds: dashboardIds });
-            if (result.success) {
-                await syncWithGoogleSheets();
-                if (currentUser && currentUser.id === userId) {
-                    const updated = USERS.find(u => u.id === userId);
-                    if (updated) currentUser = updated;
-                    initDashboard();
-                }
-                renderUsersTable();
-            } else {
-                // Fallback: update locally
-                const userIndex = USERS.findIndex(u => u.id === userId);
-                if (userIndex !== -1) {
-                    USERS[userIndex].dashboardIds = dashboardIds;
-                    renderUsersTable();
-                    if (currentUser && currentUser.id === userId) {
-                        currentUser.dashboardIds = dashboardIds;
-                        initDashboard();
-                    }
-                    alert('Permissions updated locally (offline mode)');
-                }
-            }
-        }
-        
-        async function toggleUserStatus(userId) {
-            const user = USERS.find(u => u.id === userId);
-            if (user && user.username !== 'admin') {
-                const result = await callGoogleSheets('updateUser', { id: userId, isActive: !user.isActive });
-                if (result.success) {
-                    await syncWithGoogleSheets();
-                    renderUsersTable();
-                    if (currentUser && currentUser.id === userId && !user.isActive) logout();
-                } else {
-                    // Fallback: update locally
-                    user.isActive = !user.isActive;
-                    renderUsersTable();
-                    if (currentUser && currentUser.id === userId && !user.isActive) logout();
-                }
-            }
-        }
-        
-        async function deleteUser(userId) {
-            const user = USERS.find(u => u.id === userId);
-            if (user && confirm(`Delete ${user.name}?`)) {
-                const result = await callGoogleSheets('deleteUser', { id: userId });
-                if (result.success) {
-                    await syncWithGoogleSheets();
-                    renderUsersTable();
-                    document.getElementById('totalUsers').textContent = USERS.length;
-                } else {
-                    // Fallback: delete locally
-                    const index = USERS.findIndex(u => u.id === userId);
-                    if (index !== -1) {
-                        USERS.splice(index, 1);
-                        renderUsersTable();
-                        document.getElementById('totalUsers').textContent = USERS.length;
-                        alert('User deleted locally (offline mode)');
-                    }
-                }
-            }
-        }
-        
-        function renderUsersTable() {
-            const tbody = document.getElementById('usersTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = USERS.filter(u => u.isActive !== false).map(user => `
-                <tr>
-                    <td>${user.username}</td>
-                    <td>${user.name}</td>
-                    <td>${user.role}</td>
-                    <td>
-                        ${(user.dashboardIds || [1,2]).map(id => {
-                            const dash = MASTER_DASHBOARDS.find(d => d.id === id);
-                            return dash ? `<span class="permission-badge" title="${dash.title}">${dash.title.substring(0, 8)}</span>` : '';
-                        }).join('') || 'None'}
-                        <button class="edit-user-btn" onclick="editUserPermissions(${user.id})"><i class="fas fa-edit"></i></button>
-                    </td>
-                    <td><span class="user-status ${user.isActive !== false ? 'status-active' : 'status-inactive'}">${user.isActive !== false ? 'Active' : 'Inactive'}</span></td>
-                    <td>
-                        <button class="edit-user-btn" onclick="toggleUserStatus(${user.id})" title="${user.isActive !== false ? 'Deactivate' : 'Activate'}">
-                            <i class="fas ${user.isActive !== false ? 'fa-ban' : 'fa-check-circle'}"></i>
-                        </button>
-                        ${user.username !== 'admin' ? `<button class="delete-user-btn" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>` : ''}
-                     </td>
-                </tr>
-            `).join('');
-        }
-        
-        function editUserPermissions(userId) {
-            const user = USERS.find(u => u.id === userId);
-            if (!user) return;
-            
-            const options = MASTER_DASHBOARDS.map(d => `
-                <label style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
-                    <input type="checkbox" value="${d.id}" ${(user.dashboardIds || [1,2]).includes(d.id) ? 'checked' : ''}>
-                    ${d.title}
-                </label>
-            `).join('');
-            
-            const modal = document.createElement('div');
-            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;';
-            modal.innerHTML = `
-                <div style="background:var(--card-bg);border-radius:20px;padding:24px;max-width:500px;width:90%;max-height:80vh;overflow:auto;">
-                    <h3 style="margin-bottom:16px;">Edit Permissions: ${user.name}</h3>
-                    <div id="permList">${options}</div>
-                    <div style="margin-top:20px;display:flex;gap:10px;">
-                        <button class="login-btn" onclick="savePermissions(${userId})">Save</button>
-                        <button class="login-btn" style="background:gray;" onclick="this.closest('div').remove()">Cancel</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        
-        window.savePermissions = async function(userId) {
-            const checkboxes = document.querySelectorAll('#permList input[type="checkbox"]');
-            const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
-            await updateUserPermissions(userId, selected);
-            const modal = document.querySelector('#permList')?.closest('div')?.parentElement;
-            if (modal) modal.remove();
-        };
         
         function getUserDashboards(user) {
             if (!user) return [];
@@ -880,7 +583,7 @@
             if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
         
-        async function handleLogin() {
+        function handleLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const errorDiv = document.getElementById('errorMsg');
@@ -899,42 +602,24 @@
             loginBtn.disabled = true;
             errorDiv.style.display = 'none';
             
-            await syncWithGoogleSheets();
-            
-            debugLog(`Login attempt: username="${username}", password="${password}"`);
-            debugLog(`Available users: ${USERS.map(u => `${u.username}/${u.password}`).join(', ')}`);
-            
-            const user = USERS.find(u => u.username === username && u.password === password && u.isActive !== false);
-            
-            debugLog(`User found: ${user ? `Yes (${user.name})` : 'No'}`);
-            
-            if (user) {
-                currentUser = user;
-                localStorage.setItem('colt_user', JSON.stringify(currentUser));
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('dashboardContainer').style.display = 'block';
-                initDashboard();
-                debugLog(`Login successful for ${user.name}`);
-            } else {
-                const existingUser = USERS.find(u => u.username === username);
-                if (existingUser) {
-                    if (existingUser.password !== password) {
-                        errorDiv.textContent = `Wrong password for "${username}"!`;
-                    } else if (existingUser.isActive === false) {
-                        errorDiv.textContent = 'Your account is deactivated. Contact admin.';
-                    } else {
-                        errorDiv.textContent = 'Invalid username or password!';
-                    }
+            setTimeout(() => {
+                const user = USERS_DATA.find(u => u.username === username && u.password === password && u.isActive);
+                
+                if (user) {
+                    currentUser = user;
+                    localStorage.setItem('colt_user', JSON.stringify(currentUser));
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('dashboardContainer').style.display = 'block';
+                    initDashboard();
                 } else {
-                    errorDiv.textContent = `User "${username}" not found!`;
+                    errorDiv.textContent = 'Invalid username or password!';
+                    errorDiv.style.display = 'block';
                 }
-                errorDiv.style.display = 'block';
-                debugLog(`Login failed for ${username}`);
-            }
-            
-            loginText.style.display = 'inline';
-            loginLoader.style.display = 'none';
-            loginBtn.disabled = false;
+                
+                loginText.style.display = 'inline';
+                loginLoader.style.display = 'none';
+                loginBtn.disabled = false;
+            }, 500);
         }
         
         function initDashboard() {
@@ -948,7 +633,7 @@
             
             const userDashboards = getUserDashboards(currentUser);
             document.getElementById('totalDashboards').textContent = userDashboards.length;
-            document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive !== false).length;
+            document.getElementById('totalUsers').textContent = USERS_DATA.filter(u => u.isActive).length;
             
             document.getElementById('userDashboardsGrid').innerHTML = userDashboards.map(d => `
                 <a href="${d.url}" class="dash-card" target="_blank">
@@ -971,6 +656,22 @@
             if (currentUser.role === 'admin') renderUsersTable();
         }
         
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = USERS_DATA.filter(u => u.isActive).map(user => `
+                <tr>
+                    <td>${user.username}</td>
+                    <td>${user.name}</td>
+                    <td>${user.role}</td>
+                    <td><span class="user-status status-active">Active</span></td>
+                    <td>
+                        <button class="edit-user-btn" onclick="alert('Edit user feature - Contact Admin')"><i class="fas fa-edit"></i></button>
+                    </td
+                </tr>
+            `).join('');
+        }
+        
         function showPage(page) {
             document.getElementById('dashboardPage').style.display = 'none';
             document.getElementById('allDashboardsPage').style.display = 'none';
@@ -988,7 +689,6 @@
                 document.getElementById('adminPage').style.display = 'block';
                 document.getElementById('pageTitle').textContent = 'Admin Panel';
                 document.getElementById('pageSubtitle').textContent = 'Manage users and permissions.';
-                if (currentUser?.role === 'admin') renderUsersTable();
             }
             
             document.querySelectorAll('.nav-item').forEach((item, i) => {
@@ -1013,12 +713,11 @@
         
         document.getElementById('password')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
         
-        async function checkSession() {
+        function checkSession() {
             const savedUser = localStorage.getItem('colt_user');
             if (savedUser) {
-                await syncWithGoogleSheets();
                 currentUser = JSON.parse(savedUser);
-                const validUser = USERS.find(u => u.id === currentUser.id && u.isActive !== false);
+                const validUser = USERS_DATA.find(u => u.id === currentUser.id && u.isActive);
                 if (validUser) {
                     currentUser = validUser;
                     document.getElementById('loginContainer').style.display = 'none';
@@ -1033,12 +732,11 @@
         initTheme();
         checkSession();
         
-        window.addNewUser = addNewUser;
-        window.toggleUserStatus = toggleUserStatus;
-        window.deleteUser = deleteUser;
-        window.editUserPermissions = editUserPermissions;
-        window.syncWithGoogleSheets = syncWithGoogleSheets;
-        window.savePermissions = savePermissions;
+        window.handleLogin = handleLogin;
+        window.toggleTheme = toggleTheme;
+        window.showPage = showPage;
+        window.toggleSidebar = toggleSidebar;
+        window.logout = logout;
     </script>
 </body>
 </html>
