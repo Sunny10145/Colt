@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COLT Equipment | Enterprise Portal</title>
+    <title>COLT Equipment | Google Sheets Powered Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -343,7 +343,9 @@
             font-size: 10px;
             margin: 2px;
             display: inline-block;
+            cursor: pointer;
         }
+        .permission-badge:hover { opacity: 0.8; }
         
         .menu-toggle {
             display: none;
@@ -357,6 +359,36 @@
             border-radius: 10px;
             cursor: pointer;
         }
+        
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+        .sync-dot.error { background: var(--danger); }
+        .sync-dot.syncing { background: var(--warning); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        
+        .refresh-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .refresh-btn:hover { background: var(--bg-secondary); color: var(--primary); }
         
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -373,7 +405,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 12px;
+            margin-top: 8px;
             font-weight: 600;
         }
         
@@ -394,6 +426,51 @@
             padding: 24px;
             margin-bottom: 32px;
             border: 1px solid var(--border);
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .perm-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
         }
     </style>
 </head>
@@ -424,7 +501,7 @@
             <div id="errorMsg" class="login-error"></div>
             
             <div style="margin-top: 20px; text-align: center; font-size: 12px; color: var(--text-muted);">
-                <p>🔐 Demo Credentials:</p>
+                <p>🔐 Demo Credentials (Fallback Mode):</p>
                 <p><strong>admin</strong> / admin123 &nbsp;|&nbsp; <strong>manager</strong> / manager123</p>
                 <p><strong>employee1</strong> / emp123 &nbsp;|&nbsp; <strong>employee2</strong> / emp123</p>
             </div>
@@ -461,6 +538,11 @@
                         <div style="font-size: 11px; color: var(--text-secondary);" id="userRole">Role</div>
                     </div>
                 </div>
+                <div class="sync-status">
+                    <div class="sync-dot" id="syncDot"></div>
+                    <span id="syncText">Connecting to Google Sheets...</span>
+                    <button class="refresh-btn" onclick="syncWithGoogleSheets()"><i class="fas fa-sync-alt"></i></button>
+                </div>
                 <button class="logout-btn" onclick="logout()">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -484,7 +566,7 @@
             <div id="dashboardPage">
                 <div class="welcome-section">
                     <h2><i class="fas fa-waveform"></i> COLT Enterprise Portal</h2>
-                    <p>Your central hub for operational dashboards and analytics</p>
+                    <p>Powered by Google Sheets | Real-time data sync</p>
                 </div>
                 
                 <div class="stats-grid">
@@ -522,21 +604,57 @@
             
             <div id="adminPage" style="display: none;">
                 <div class="admin-card">
-                    <h3 style="margin-bottom: 16px;"><i class="fas fa-users"></i> User Management</h3>
+                    <h3 style="margin-bottom: 16px;"><i class="fas fa-user-plus"></i> Add New User</h3>
+                    <div class="add-user-form">
+                        <input type="text" id="newUsername" placeholder="Username">
+                        <input type="text" id="newName" placeholder="Full Name">
+                        <input type="password" id="newPassword" placeholder="Password">
+                        <select id="newRole">
+                            <option value="employee">Employee</option>
+                            <option value="manager">Manager</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button class="login-btn" onclick="addNewUser()" style="margin-top: 0;">Add User</button>
+                    </div>
+                </div>
+                
+                <div class="admin-card">
+                    <h3 style="margin-bottom: 16px;"><i class="fas fa-users"></i> Manage Users & Permissions</h3>
                     <div style="overflow-x: auto;">
                         <table class="admin-table">
-                            <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                            <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Dashboard Access</th><th>Status</th><th>Actions</th></tr></thead>
                             <tbody id="usersTableBody"></tbody>
                         </table>
                     </div>
+                    <p style="margin-top: 12px; font-size: 11px; color: var(--text-muted);">
+                        <i class="fas fa-info-circle"></i> Click on dashboard badges to edit permissions
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ============= USERS DATABASE =============
-        const USERS_DATA = [
+        // ═══════════════════════════════════════════════════════════
+        // 🔴 YAHAN APNA GOOGLE SHEETS API URL DAALEIN 🔴
+        // Google Apps Script deploy karne ke baad ye URL yahan paste karein
+        // ═══════════════════════════════════════════════════════════
+        const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_URL/exec";
+        
+        // MASTER DASHBOARDS LIST (Complete list with proper URLs)
+        const MASTER_DASHBOARDS = [
+            { id: 1, title: "Expense Dashboard", desc: "Track all company expenses in real-time", icon: "💰", url: "https://script.google.com/macros/s/AKfycbwU5oezEwlUwyiTrDO5yGE6IKIlVTM2vPZe4wLGi3hCXBrD7HfCwndKo1AN-1MFKBVQKQ/exec", category: "Finance" },
+            { id: 2, title: "Equipment Tracker", desc: "Monitor equipment status and maintenance", icon: "🔧", url: "#", category: "Operations" },
+            { id: 3, title: "HR Analytics", desc: "Employee performance and attendance", icon: "👥", url: "#", category: "HR" },
+            { id: 4, title: "Project Dashboard", desc: "Project progress and timeline tracking", icon: "📊", url: "#", category: "Projects" },
+            { id: 5, title: "Inventory Management", desc: "Stock levels and supply chain", icon: "📦", url: "#", category: "Operations" },
+            { id: 6, title: "Sales Analytics", desc: "Revenue and sales performance", icon: "📈", url: "#", category: "Finance" },
+            { id: 7, title: "Maintenance Report", desc: "Equipment maintenance schedule", icon: "🔨", url: "#", category: "Operations" },
+            { id: 8, title: "Safety Dashboard", desc: "Safety incidents and compliance", icon: "🛡️", url: "#", category: "Safety" }
+        ];
+        
+        // Fallback Users (Agar Google Sheets fail ho to)
+        const FALLBACK_USERS = [
             { id: 1, username: "admin", password: "admin123", name: "Administrator", role: "admin", dashboardIds: [1,2,3,4,5,6,7,8], isActive: true },
             { id: 2, username: "manager", password: "manager123", name: "Operations Manager", role: "manager", dashboardIds: [1,2,4,5,7], isActive: true },
             { id: 3, username: "employee1", password: "emp123", name: "Rahul Sharma", role: "employee", dashboardIds: [1,2], isActive: true },
@@ -546,18 +664,249 @@
             { id: 7, username: "employee5", password: "emp123", name: "Vikram Singh", role: "employee", dashboardIds: [3,8], isActive: true }
         ];
         
-        const MASTER_DASHBOARDS = [
-            { id: 1, title: "Expense Dashboard", desc: "Track all company expenses", icon: "💰", "https://script.google.com/macros/s/AKfycbwU5oezEwlUwyiTrDO5yGE6IKIlVTM2vPZe4wLGi3hCXBrD7HfCwndKo1AN-1MFKBVQKQ/exec": "#", category: "Finance" },
-            { id: 2, title: "Equipment Tracker", desc: "Monitor equipment status", icon: "🔧", url: "#", category: "Operations" },
-            { id: 3, title: "HR Analytics", desc: "Employee performance", icon: "👥", url: "#", category: "HR" },
-            { id: 4, title: "Project Dashboard", desc: "Project progress", icon: "📊", url: "#", category: "Projects" },
-            { id: 5, title: "Inventory Management", desc: "Stock levels", icon: "📦", url: "#", category: "Operations" },
-            { id: 6, title: "Sales Analytics", desc: "Revenue performance", icon: "📈", url: "#", category: "Finance" },
-            { id: 7, title: "Maintenance Report", desc: "Equipment maintenance", icon: "🔨", url: "#", category: "Operations" },
-            { id: 8, title: "Safety Dashboard", desc: "Safety compliance", icon: "🛡️", url: "#", category: "Safety" }
-        ];
-        
+        let USERS = [];
         let currentUser = null;
+        
+        // ═══════════════════════════════════════════════════════════
+        // GOOGLE SHEETS API CALLS
+        // ═══════════════════════════════════════════════════════════
+        async function callGoogleSheets(action, data = {}) {
+            try {
+                console.log(`📡 Calling Google Sheets API: ${action}`);
+                const response = await fetch(GOOGLE_SHEETS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action, data: data })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                console.log(`✅ API Response:`, result);
+                return result;
+            } catch (error) {
+                console.error(`❌ API Error: ${error.message}`);
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function syncWithGoogleSheets() {
+            const dot = document.getElementById('syncDot');
+            const text = document.getElementById('syncText');
+            
+            dot.className = 'sync-dot syncing';
+            text.textContent = 'Syncing with Google Sheets...';
+            
+            try {
+                const result = await callGoogleSheets('getUsers');
+                
+                if (result.success && result.users && result.users.length > 0) {
+                    USERS = result.users;
+                    localStorage.setItem('colt_users_cache', JSON.stringify(USERS));
+                    dot.className = 'sync-dot';
+                    dot.style.background = 'var(--success)';
+                    text.textContent = `✓ Connected (${USERS.length} users)`;
+                    console.log('✅ Google Sheets sync successful');
+                    return true;
+                } else {
+                    throw new Error('No users returned from API');
+                }
+            } catch (error) {
+                console.warn('⚠️ Using fallback data:', error.message);
+                dot.className = 'sync-dot error';
+                text.textContent = '⚠ Offline mode (using local data)';
+                
+                const cached = localStorage.getItem('colt_users_cache');
+                if (cached) {
+                    USERS = JSON.parse(cached);
+                } else {
+                    USERS = JSON.parse(JSON.stringify(FALLBACK_USERS));
+                }
+                return false;
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // USER MANAGEMENT FUNCTIONS
+        // ═══════════════════════════════════════════════════════════
+        async function addNewUser() {
+            const newUser = {
+                username: document.getElementById('newUsername').value.trim(),
+                name: document.getElementById('newName').value.trim(),
+                password: document.getElementById('newPassword').value.trim(),
+                role: document.getElementById('newRole').value,
+                dashboardIds: [1, 2],
+                isActive: true
+            };
+            
+            if (!newUser.username || !newUser.name || !newUser.password) {
+                alert('Please fill all fields!');
+                return;
+            }
+            
+            if (USERS.find(u => u.username === newUser.username)) {
+                alert('Username already exists!');
+                return;
+            }
+            
+            const result = await callGoogleSheets('addUser', newUser);
+            
+            if (result.success) {
+                alert('✅ User added successfully to Google Sheets!');
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newName').value = '';
+                document.getElementById('newPassword').value = '';
+                await syncWithGoogleSheets();
+                if (currentUser?.role === 'admin') renderUsersTable();
+                document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
+            } else {
+                // Fallback: add locally
+                const newId = Math.max(...USERS.map(u => u.id), 0) + 1;
+                USERS.push({ ...newUser, id: newId });
+                renderUsersTable();
+                document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
+                alert('⚠️ User added locally (Google Sheets sync failed)');
+            }
+        }
+        
+        async function updateUserPermissions(userId, dashboardIds) {
+            const result = await callGoogleSheets('updateUser', { id: userId, dashboardIds: dashboardIds });
+            
+            if (result.success) {
+                await syncWithGoogleSheets();
+                if (currentUser && currentUser.id === userId) {
+                    currentUser.dashboardIds = dashboardIds;
+                    localStorage.setItem('colt_user', JSON.stringify(currentUser));
+                    initDashboard();
+                }
+                if (currentUser?.role === 'admin') renderUsersTable();
+                alert('✅ Permissions updated successfully!');
+            } else {
+                // Fallback: update locally
+                const userIndex = USERS.findIndex(u => u.id === userId);
+                if (userIndex !== -1) {
+                    USERS[userIndex].dashboardIds = dashboardIds;
+                    if (currentUser && currentUser.id === userId) {
+                        currentUser.dashboardIds = dashboardIds;
+                        initDashboard();
+                    }
+                    renderUsersTable();
+                    alert('⚠️ Permissions updated locally (Google Sheets sync failed)');
+                }
+            }
+        }
+        
+        async function toggleUserStatus(userId) {
+            const user = USERS.find(u => u.id === userId);
+            if (user && user.username !== 'admin') {
+                const result = await callGoogleSheets('updateUser', { id: userId, isActive: !user.isActive });
+                
+                if (result.success) {
+                    await syncWithGoogleSheets();
+                    if (currentUser && currentUser.id === userId && !user.isActive) logout();
+                    if (currentUser?.role === 'admin') renderUsersTable();
+                } else {
+                    // Fallback
+                    user.isActive = !user.isActive;
+                    renderUsersTable();
+                    if (currentUser && currentUser.id === userId && !user.isActive) logout();
+                }
+                document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
+            }
+        }
+        
+        async function deleteUser(userId) {
+            const user = USERS.find(u => u.id === userId);
+            if (user && user.username !== 'admin' && confirm(`Delete ${user.name}? This action cannot be undone.`)) {
+                const result = await callGoogleSheets('deleteUser', { id: userId });
+                
+                if (result.success) {
+                    await syncWithGoogleSheets();
+                    if (currentUser?.role === 'admin') renderUsersTable();
+                    document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
+                    alert('✅ User deleted successfully!');
+                } else {
+                    // Fallback
+                    const index = USERS.findIndex(u => u.id === userId);
+                    if (index !== -1) {
+                        USERS.splice(index, 1);
+                        renderUsersTable();
+                        document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
+                        alert('⚠️ User deleted locally (Google Sheets sync failed)');
+                    }
+                }
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // PERMISSION EDITOR MODAL
+        // ═══════════════════════════════════════════════════════════
+        function openPermissionEditor(userId) {
+            const user = USERS.find(u => u.id === userId);
+            if (!user) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Edit Permissions: ${user.name}</h3>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                    </div>
+                    <div id="permList">
+                        ${MASTER_DASHBOARDS.map(d => `
+                            <label class="perm-checkbox">
+                                <input type="checkbox" value="${d.id}" ${user.dashboardIds?.includes(d.id) ? 'checked' : ''}>
+                                <div>
+                                    <strong>${d.icon} ${d.title}</strong>
+                                    <small style="display: block; color: var(--text-muted);">${d.category}</small>
+                                </div>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button class="login-btn" onclick="savePermissionsFromModal(${userId})">Save Changes</button>
+                        <button class="login-btn" style="background: gray;" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        async function savePermissionsFromModal(userId) {
+            const checkboxes = document.querySelectorAll('#permList input[type="checkbox"]');
+            const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+            await updateUserPermissions(userId, selectedIds);
+            document.querySelector('.modal-overlay')?.remove();
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // RENDER FUNCTIONS
+        // ═══════════════════════════════════════════════════════════
+        function renderUsersTable() {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = USERS.filter(u => u.isActive).map(user => `
+                <tr>
+                    <td>${user.username}</td
+                    <td>${user.name}</td
+                    <td>${user.role}</td
+                    <td>
+                        ${(user.dashboardIds || [1,2]).map(id => {
+                            const dash = MASTER_DASHBOARDS.find(d => d.id === id);
+                            return dash ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})" title="Click to edit">${dash.title.substring(0, 12)} 🖊️</span>` : '';
+                        }).join('')}
+                        ${(user.dashboardIds || []).length === 0 ? '<span class="permission-badge" onclick="openPermissionEditor(${user.id})">+ Add Permissions 🖊️</span>' : ''}
+                    </td>
+                    <td><span class="user-status status-active">Active</span></td>
+                    <td>
+                        <button class="edit-user-btn" onclick="openPermissionEditor(${user.id})" title="Edit Permissions"><i class="fas fa-key"></i></button>
+                        <button class="edit-user-btn" onclick="toggleUserStatus(${user.id})" title="Deactivate"><i class="fas fa-ban"></i></button>
+                        ${user.username !== 'admin' ? `<button class="delete-user-btn" onclick="deleteUser(${user.id})" title="Delete"><i class="fas fa-trash"></i></button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
         
         function getUserDashboards(user) {
             if (!user) return [];
@@ -583,7 +932,7 @@
             if (icon) icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
         
-        function handleLogin() {
+        async function handleLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
             const errorDiv = document.getElementById('errorMsg');
@@ -602,24 +951,25 @@
             loginBtn.disabled = true;
             errorDiv.style.display = 'none';
             
-            setTimeout(() => {
-                const user = USERS_DATA.find(u => u.username === username && u.password === password && u.isActive);
-                
-                if (user) {
-                    currentUser = user;
-                    localStorage.setItem('colt_user', JSON.stringify(currentUser));
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('dashboardContainer').style.display = 'block';
-                    initDashboard();
-                } else {
-                    errorDiv.textContent = 'Invalid username or password!';
-                    errorDiv.style.display = 'block';
-                }
-                
-                loginText.style.display = 'inline';
-                loginLoader.style.display = 'none';
-                loginBtn.disabled = false;
-            }, 500);
+            await syncWithGoogleSheets();
+            
+            const user = USERS.find(u => u.username === username && u.password === password && u.isActive);
+            
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('colt_user', JSON.stringify(currentUser));
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+                initDashboard();
+                errorDiv.style.display = 'none';
+            } else {
+                errorDiv.textContent = 'Invalid username or password!';
+                errorDiv.style.display = 'block';
+            }
+            
+            loginText.style.display = 'inline';
+            loginLoader.style.display = 'none';
+            loginBtn.disabled = false;
         }
         
         function initDashboard() {
@@ -633,7 +983,7 @@
             
             const userDashboards = getUserDashboards(currentUser);
             document.getElementById('totalDashboards').textContent = userDashboards.length;
-            document.getElementById('totalUsers').textContent = USERS_DATA.filter(u => u.isActive).length;
+            document.getElementById('totalUsers').textContent = USERS.filter(u => u.isActive).length;
             
             document.getElementById('userDashboardsGrid').innerHTML = userDashboards.map(d => `
                 <a href="${d.url}" class="dash-card" target="_blank">
@@ -656,22 +1006,6 @@
             if (currentUser.role === 'admin') renderUsersTable();
         }
         
-        function renderUsersTable() {
-            const tbody = document.getElementById('usersTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = USERS_DATA.filter(u => u.isActive).map(user => `
-                <tr>
-                    <td>${user.username}</td>
-                    <td>${user.name}</td>
-                    <td>${user.role}</td>
-                    <td><span class="user-status status-active">Active</span></td>
-                    <td>
-                        <button class="edit-user-btn" onclick="alert('Edit user feature - Contact Admin')"><i class="fas fa-edit"></i></button>
-                    </td
-                </tr>
-            `).join('');
-        }
-        
         function showPage(page) {
             document.getElementById('dashboardPage').style.display = 'none';
             document.getElementById('allDashboardsPage').style.display = 'none';
@@ -688,7 +1022,8 @@
             } else if (page === 'admin') {
                 document.getElementById('adminPage').style.display = 'block';
                 document.getElementById('pageTitle').textContent = 'Admin Panel';
-                document.getElementById('pageSubtitle').textContent = 'Manage users and permissions.';
+                document.getElementById('pageSubtitle').textContent = 'Manage users and dashboard permissions.';
+                if (currentUser?.role === 'admin') renderUsersTable();
             }
             
             document.querySelectorAll('.nav-item').forEach((item, i) => {
@@ -713,11 +1048,12 @@
         
         document.getElementById('password')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
         
-        function checkSession() {
+        async function checkSession() {
             const savedUser = localStorage.getItem('colt_user');
             if (savedUser) {
+                await syncWithGoogleSheets();
                 currentUser = JSON.parse(savedUser);
-                const validUser = USERS_DATA.find(u => u.id === currentUser.id && u.isActive);
+                const validUser = USERS.find(u => u.id === currentUser.id && u.isActive);
                 if (validUser) {
                     currentUser = validUser;
                     document.getElementById('loginContainer').style.display = 'none';
@@ -729,14 +1065,21 @@
             }
         }
         
-        initTheme();
-        checkSession();
-        
+        // Make functions global for onclick
         window.handleLogin = handleLogin;
         window.toggleTheme = toggleTheme;
         window.showPage = showPage;
         window.toggleSidebar = toggleSidebar;
         window.logout = logout;
+        window.syncWithGoogleSheets = syncWithGoogleSheets;
+        window.addNewUser = addNewUser;
+        window.toggleUserStatus = toggleUserStatus;
+        window.deleteUser = deleteUser;
+        window.openPermissionEditor = openPermissionEditor;
+        window.savePermissionsFromModal = savePermissionsFromModal;
+        
+        initTheme();
+        checkSession();
     </script>
 </body>
 </html>
