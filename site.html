@@ -20,7 +20,6 @@
             --info: #3b82f6;
         }
         
-        /* LIGHT THEME (DEFAULT) */
         body {
             font-family: 'Inter', sans-serif;
             transition: all 0.3s;
@@ -37,7 +36,6 @@
             --shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         
-        /* DARK THEME */
         body.dark {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
@@ -698,7 +696,7 @@
                     const { data: users, error } = await supabaseClient
                         .from('users')
                         .select('*')
-                        .eq('is_active', true);
+                        .order('id', { ascending: true });
                     
                     if (error) throw error;
                     
@@ -718,9 +716,7 @@
                     return true;
                 } catch (error) {
                     console.error('Supabase error:', error);
-                    if (dot) {
-                        dot.className = 'sync-dot error';
-                    }
+                    if (dot) dot.className = 'sync-dot error';
                     if (text) text.textContent = '⚠ Offline mode';
                     
                     const cached = localStorage.getItem('colt_users_cache');
@@ -738,7 +734,7 @@
                         .eq('is_active', true);
                     
                     if (error) throw error;
-                    allDashboards = dashboards || FALLBACK_DASHBOARDS;
+                    allDashboards = (dashboards && dashboards.length > 0) ? dashboards : FALLBACK_DASHBOARDS;
                     return true;
                 } catch (error) {
                     console.error('Error loading dashboards:', error);
@@ -747,7 +743,7 @@
                 }
             }
             
-            // Add new user
+            // Add new user - Fixed version with proper ID handling
             async function addUser() {
                 const username = document.getElementById('newUsername')?.value.trim() || '';
                 const name = document.getElementById('newName')?.value.trim() || '';
@@ -764,13 +760,16 @@
                     return;
                 }
                 
+                // Let Supabase auto-generate the ID
                 const newUser = {
                     username: username,
                     name: name,
                     password: password,
                     role: role,
                     dashboard_ids: [1, 2],
-                    is_active: true
+                    is_active: true,
+                    created_at: new Date(),
+                    updated_at: new Date()
                 };
                 
                 try {
@@ -782,12 +781,9 @@
                     if (error) throw error;
                     
                     alert('✅ User added successfully to Supabase!');
-                    const newUsername = document.getElementById('newUsername');
-                    const newName = document.getElementById('newName');
-                    const newPassword = document.getElementById('newPassword');
-                    if (newUsername) newUsername.value = '';
-                    if (newName) newName.value = '';
-                    if (newPassword) newPassword.value = '';
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newName').value = '';
+                    document.getElementById('newPassword').value = '';
                     
                     await loadUsers();
                     if (currentUser?.role === 'admin') renderUsersTable();
@@ -796,7 +792,7 @@
                     
                 } catch (error) {
                     console.error('Error adding user:', error);
-                    alert('❌ Failed to add user: ' + error.message);
+                    alert('❌ Failed to add user: ' + (error.message || 'Unknown error'));
                 }
             }
             
@@ -823,7 +819,7 @@
                     
                 } catch (error) {
                     console.error('Error updating permissions:', error);
-                    alert('❌ Failed to update permissions: ' + error.message);
+                    alert('❌ Failed to update permissions: ' + (error.message || 'Unknown error'));
                 }
             }
             
@@ -848,7 +844,7 @@
                         
                     } catch (error) {
                         console.error('Error toggling status:', error);
-                        alert('❌ Failed to update status: ' + error.message);
+                        alert('❌ Failed to update status: ' + (error.message || 'Unknown error'));
                     }
                 }
             }
@@ -873,7 +869,7 @@
                         
                     } catch (error) {
                         console.error('Error deleting user:', error);
-                        alert('❌ Failed to delete user: ' + error.message);
+                        alert('❌ Failed to delete user: ' + (error.message || 'Unknown error'));
                     }
                 }
             }
@@ -926,15 +922,15 @@
                 
                 tbody.innerHTML = allUsers.filter(u => u.is_active).map(user => `
                     <tr>
-                        <td style="color: var(--text-primary);">${user.username}</td>
-                        <td style="color: var(--text-primary);">${user.name}</td>
-                        <td style="color: var(--text-primary);">${user.role}</td>
+                        <td style="color: var(--text-primary);">${escapeHtml(user.username)}</td>
+                        <td style="color: var(--text-primary);">${escapeHtml(user.name)}</td>
+                        <td style="color: var(--text-primary);">${escapeHtml(user.role)}</td>
                         <td>
                             ${(user.dashboard_ids || [1,2]).map(id => {
                                 const dash = allDashboards.find(d => d.id === id);
-                                return dash ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})" title="Click to edit">${dash.title.substring(0, 12)} 🖊️</span>` : '';
+                                return dash ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})" title="Click to edit">${escapeHtml(dash.title.substring(0, 12))} 🖊️</span>` : '';
                             }).join('')}
-                            ${(user.dashboard_ids || []).length === 0 ? '<span class="permission-badge" onclick="openPermissionEditor(' + user.id + ')">+ Add Permissions 🖊️</span>' : ''}
+                            ${(user.dashboard_ids || []).length === 0 ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})">+ Add Permissions 🖊️</span>` : ''}
                         </td>
                         <td><span class="user-status status-active">Active</span></td>
                         <td>
@@ -944,6 +940,16 @@
                         </td>
                     </tr>
                 `).join('');
+            }
+            
+            function escapeHtml(str) {
+                if (!str) return '';
+                return str.replace(/[&<>]/g, function(m) {
+                    if (m === '&') return '&amp;';
+                    if (m === '<') return '&lt;';
+                    if (m === '>') return '&gt;';
+                    return m;
+                });
             }
             
             function getUserDashboards(user) {
@@ -970,8 +976,8 @@
                 showLoader(true);
                 if (errorDiv) errorDiv.style.display = 'none';
                 
-                await loadUsers();
                 await loadDashboards();
+                await loadUsers();
                 
                 const user = allUsers.find(u => u.username === username && u.password === password && u.is_active);
                 
@@ -1023,9 +1029,9 @@
                     userGrid.innerHTML = userDashboards.map(d => `
                         <a href="${d.url}" class="dash-card" target="_blank">
                             <div class="dash-icon">${d.icon}</div>
-                            <h3>${d.title}</h3>
-                            <p>${d.description}</p>
-                            <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
+                            <h3>${escapeHtml(d.title)}</h3>
+                            <p>${escapeHtml(d.description)}</p>
+                            <div class="dash-tags"><span class="dash-tag">${escapeHtml(d.category)}</span></div>
                         </a>
                     `).join('');
                 }
@@ -1034,9 +1040,9 @@
                     allGrid.innerHTML = allDashboards.map(d => `
                         <div class="dash-card">
                             <div class="dash-icon">${d.icon}</div>
-                            <h3>${d.title}</h3>
-                            <p>${d.description}</p>
-                            <div class="dash-tags"><span class="dash-tag">${d.category}</span></div>
+                            <h3>${escapeHtml(d.title)}</h3>
+                            <p>${escapeHtml(d.description)}</p>
+                            <div class="dash-tags"><span class="dash-tag">${escapeHtml(d.category)}</span></div>
                         </div>
                     `).join('');
                 }
