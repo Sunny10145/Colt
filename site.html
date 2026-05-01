@@ -1274,8 +1274,8 @@
         const icon = document.getElementById('newDashIcon').value.trim() || '📊';
         const url = document.getElementById('newDashUrl').value.trim();
         const category = document.getElementById('newDashCategory').value.trim() || 'General';
-        if (!title || !url) { showToast('⚠️ Title aur URL zaroori hain!', 'error'); return; }
-        if (!url.startsWith('http')) { showToast('⚠️ Valid URL daalo (https://...)', 'error'); return; }
+        if (!title || !url) { showToast('⚠️ Title and URL are required!', 'error'); return; }
+        if (!url.startsWith('http')) { showToast('⚠️ Enter a valid URL! (https://...)', 'error'); return; }
         try {
             const { error } = await supabase.from('dashboards').insert([{ title, description: desc, icon, url, category, is_active: true }]).select();
             if (error) throw error;
@@ -1601,7 +1601,7 @@
             home:       { pageId: 'homePage',          navId: 'navHome',       title: 'Home',         subtitle: 'Welcome to COLT Equipment Portal' },
             dashboards: { pageId: 'dashboardsListPage', navId: 'navDashboards', title: 'Dashboards',   subtitle: 'All your dashboards' },
             admin:      { pageId: 'adminPage',          navId: 'adminNavItem',  title: 'Admin Panel',  subtitle: 'Manage users and permissions' },
-            master:     { pageId: 'masterPage',         navId: 'masterNavItem', title: 'Master Panel', subtitle: 'Dashboards aur system manage karein' }
+            master:     { pageId: 'masterPage',         navId: 'masterNavItem', title: 'Master Panel', subtitle: 'Manage dashboards and system' }
         };
 
         const config = pageMap[page];
