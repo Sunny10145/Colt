@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COLT Equipment |Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>COLT Equipment | Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
@@ -14,17 +14,18 @@
         :root {
             --primary: #f97316;
             --primary-dark: #ea580c;
+            --primary-light: rgba(249,115,22,0.1);
+            --primary-mid: rgba(249,115,22,0.2);
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
             --info: #3b82f6;
-            --gray: #6b7280;
-            --gray-light: #e5e7eb;
+            --purple: #8b5cf6;
         }
         
         body {
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background 0.3s, color 0.3s;
             min-height: 100vh;
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -35,7 +36,8 @@
             --card-bg: #ffffff;
             --sidebar-bg: #ffffff;
             --input-bg: #f1f5f9;
-            --shadow: 0 1px 2px rgba(0,0,0,0.05);
+            background: var(--bg-primary);
+            color: var(--text-primary);
         }
         
         body.dark {
@@ -48,829 +50,1645 @@
             --card-bg: #1e293b;
             --sidebar-bg: #0f172a;
             --input-bg: #1e293b;
-            --shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
-        
-        body { background: var(--bg-primary); color: var(--text-primary); }
-        
-        /* Login Container */
+
+        /* ===================================================
+           LOGIN PAGE — LIGHT, WARM, PREMIUM
+        =================================================== */
         .login-container {
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .login-card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 32px 28px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.25);
-            animation: slideUp 0.4s ease;
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .logo-area { text-align: center; margin-bottom: 24px; }
-        
-        .logo-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
+            align-items: stretch;
+            background: #fefaf6;
+            position: relative;
             overflow: hidden;
         }
-        
-        .logo-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+
+        /* Left decorative panel */
+        .login-left {
+            flex: 1;
+            background: linear-gradient(145deg, #fff8f0 0%, #ffecd6 40%, #ffd9b3 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .login-card h1 { font-size: 24px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
-        .login-card p { color: var(--text-secondary); font-size: 13px; }
-        
-        .input-group { margin-bottom: 16px; }
-        .input-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
-        .input-group input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            font-size: 13px;
-            background: var(--input-bg);
-            color: var(--text-primary);
-            transition: all 0.3s;
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(249,115,22,0.18) 0%, transparent 70%);
+            top: -80px; right: -80px;
+            border-radius: 50%;
         }
-        .input-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
-        
-        .login-btn {
-            width: 100%;
-            padding: 10px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+        .login-left::after {
+            content: '';
+            position: absolute;
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%);
+            bottom: -60px; left: -60px;
+            border-radius: 50%;
         }
-        .login-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(249,115,22,0.4); }
-        
-        .login-error {
-            background: rgba(239,68,68,0.1);
-            color: var(--danger);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            margin-top: 14px;
-            display: none;
+
+        /* Floating geometric decorations */
+        .login-geo {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+        }
+        .login-geo-1 {
+            width: 180px; height: 180px;
+            border: 3px solid var(--primary);
+            top: 15%; left: 10%;
+            animation: geoFloat 6s ease-in-out infinite;
+        }
+        .login-geo-2 {
+            width: 100px; height: 100px;
+            background: var(--primary);
+            bottom: 20%; right: 15%;
+            animation: geoFloat 8s ease-in-out infinite reverse;
+        }
+        .login-geo-3 {
+            width: 60px; height: 60px;
+            border: 2px solid var(--primary-dark);
+            top: 60%; left: 20%;
+            animation: geoFloat 5s ease-in-out infinite 1s;
+        }
+
+        @keyframes geoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(10deg); }
+        }
+
+        .login-brand {
+            position: relative; z-index: 2;
             text-align: center;
         }
-        
+
+        .login-brand-logo {
+            width: 90px; height: 90px;
+            border-radius: 24px;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(249,115,22,0.3);
+            box-shadow: 0 20px 60px rgba(249,115,22,0.25), 0 0 0 8px rgba(249,115,22,0.08);
+            animation: logoPop 0.6s cubic-bezier(0.22,1,0.36,1);
+        }
+        @keyframes logoPop {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .login-brand-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+        .login-brand h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 34px; font-weight: 900;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        .login-brand h1 span { color: var(--primary); }
+        .login-brand p {
+            font-size: 13px; font-weight: 600;
+            color: #9a7a60;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .login-tagline {
+            margin-top: 40px;
+            position: relative; z-index: 2;
+            max-width: 320px;
+            text-align: center;
+        }
+        .login-tagline h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px; font-weight: 700;
+            color: #3d2b1f;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+        .login-tagline p {
+            font-size: 13px; color: #8b6b55;
+            line-height: 1.6; font-weight: 500;
+        }
+
+        .login-pills {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 24px;
+            position: relative; z-index: 2;
+        }
+        .login-pill {
+            background: white;
+            border: 1.5px solid rgba(249,115,22,0.2);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 11px; font-weight: 700;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(249,115,22,0.1);
+            animation: pillFade 0.5s ease both;
+        }
+        .login-pill:nth-child(1) { animation-delay: 0.1s; }
+        .login-pill:nth-child(2) { animation-delay: 0.2s; }
+        .login-pill:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes pillFade {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Right form panel */
+        .login-right {
+            width: 420px;
+            min-width: 420px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 44px;
+            box-shadow: -20px 0 60px rgba(0,0,0,0.06);
+            position: relative;
+        }
+
+        .login-form-header {
+            width: 100%;
+            margin-bottom: 32px;
+        }
+        .login-form-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 26px; font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .login-form-header p {
+            font-size: 13px; color: #94a3b8; font-weight: 500;
+        }
+
+        .login-divider {
+            width: 40px; height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 2px;
+            margin: 10px 0 0;
+        }
+
+        .input-group { margin-bottom: 16px; width: 100%; }
+        .input-group label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 700;
+            color: #64748b;
+            margin-bottom: 7px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .input-group label i { color: var(--primary); font-size: 10px; }
+
+        .input-wrap { position: relative; }
+        .input-wrap input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border: 1.5px solid #e8edf3;
+            border-radius: 12px;
+            font-size: 13px;
+            font-family: inherit;
+            background: #f9fafb;
+            color: #1a1a1a;
+            transition: all 0.25s;
+            font-weight: 500;
+        }
+        .input-wrap input::placeholder { color: #b0bec5; }
+        .input-wrap input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
+        }
+        .input-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: #cbd5e1; font-size: 13px;
+            transition: color 0.25s;
+        }
+        .input-wrap:focus-within .input-icon { color: var(--primary); }
+
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #ff8a3c, var(--primary), var(--primary-dark));
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 0.04em;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(249,115,22,0.35);
+        }
+        .login-btn::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(249,115,22,0.45);
+        }
+        .login-btn:hover::before { opacity: 1; }
+        .login-btn:active { transform: translateY(0); }
+        .login-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        .login-error {
+            background: #fff5f5;
+            border: 1.5px solid #fecaca;
+            color: #dc2626;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-top: 12px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .login-footer-note {
+            margin-top: 28px;
+            text-align: center;
+            font-size: 11px;
+            color: #c0ccd8;
+            font-weight: 500;
+            width: 100%;
+        }
+        .login-footer-note span {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Responsive login */
+        @media (max-width: 768px) {
+            .login-container { flex-direction: column; }
+            .login-left { flex: none; min-height: 220px; padding: 36px 24px; }
+            .login-brand h1 { font-size: 26px; }
+            .login-brand-logo { width: 64px; height: 64px; }
+            .login-tagline { display: none; }
+            .login-pills { display: none; }
+            .login-right {
+                width: 100%; min-width: unset;
+                padding: 32px 24px;
+                box-shadow: none;
+                flex: 1;
+            }
+        }
+
         .dashboard-container { display: none; }
-        
-        /* Sidebar - Compact */
+
+        /* ===================================================
+           SIDEBAR
+        =================================================== */
         .sidebar {
             position: fixed;
-            left: 0;
-            top: 0;
-            width: 240px;
-            height: 100%;
+            left: 0; top: 0;
+            width: 256px; height: 100%;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
-            padding: 20px;
-            transition: all 0.3s;
+            padding: 18px 14px;
+            transition: transform 0.3s;
             z-index: 100;
-        }
-        
-        .sidebar-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-        .sidebar-logo img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; }
-        .sidebar-logo h2 { font-size: 16px; font-weight: 700; color: var(--text-primary); }
-        .sidebar-logo p { font-size: 9px; color: var(--text-secondary); }
-        
-        .nav-item {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 22px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-logo-img {
+            width: 38px; height: 38px;
+            border-radius: 10px; object-fit: cover;
+            box-shadow: 0 2px 8px rgba(249,115,22,0.2);
+        }
+        .sidebar-logo h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px; font-weight: 800;
+            color: var(--text-primary); line-height: 1.2;
+        }
+        .sidebar-logo p { font-size: 9px; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
             padding: 10px 12px;
-            margin: 4px 0;
-            border-radius: 8px;
+            margin: 2px 0;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
             color: var(--text-secondary);
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
+            position: relative;
         }
-        .nav-item:hover, .nav-item.active { background: var(--primary); color: white; }
-        .nav-item i { width: 18px; font-size: 14px; }
-        
+        .nav-item:hover { background: var(--primary-light); color: var(--primary); }
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 14px rgba(249,115,22,0.35);
+        }
+        .nav-item i { width: 18px; font-size: 13px; text-align: center; }
+
+        .nav-section-label {
+            font-size: 9px; font-weight: 700; color: var(--text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            padding: 12px 12px 4px;
+        }
+
         .user-section {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
+            margin-top: auto;
             padding: 12px;
             background: var(--bg-secondary);
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid var(--border);
         }
-        
-        .main-content { margin-left: 240px; padding: 16px 20px; }
-        
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .page-title h1 { font-size: 20px; font-weight: 700; color: var(--text-primary); }
-        .page-title p { color: var(--text-secondary); font-size: 12px; margin-top: 2px; }
-        
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--card-bg);
-            padding: 6px 14px;
-            border-radius: 30px;
-            border: 1px solid var(--border);
-        }
-        
+        .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 36px; height: 36px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            font-size: 13px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: white; font-size: 15px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(249,115,22,0.3);
+            font-family: 'Outfit', sans-serif;
         }
-        
-        /* Stats Cards - Compact */
+        .user-name { font-weight: 700; font-size: 13px; color: var(--text-primary); }
+        .user-role { font-size: 10px; color: var(--text-secondary); font-weight: 600; }
+        .sync-status { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-muted); margin-bottom: 10px; }
+        .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+        .logout-btn {
+            width: 100%; padding: 8px;
+            background: rgba(239,68,68,0.08);
+            color: var(--danger);
+            border: 1.5px solid rgba(239,68,68,0.15);
+            border-radius: 8px;
+            cursor: pointer; font-size: 12px; font-weight: 700; font-family: inherit;
+            transition: all 0.2s;
+            letter-spacing: 0.02em;
+        }
+        .logout-btn:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* ===================================================
+           MAIN CONTENT
+        =================================================== */
+        .main-content { margin-left: 256px; padding: 22px 26px; min-height: 100vh; background: var(--bg-primary); }
+
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 22px;
+        }
+        .page-title h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px; font-weight: 800; color: var(--text-primary);
+            letter-spacing: -0.3px;
+        }
+        .page-title p { color: var(--text-secondary); font-size: 12px; margin-top: 2px; font-weight: 500; }
+
+        .top-right { display: flex; align-items: center; gap: 10px; }
+
+        .date-chip {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 7px 14px;
+            font-size: 12px; font-weight: 600; color: var(--text-secondary);
+        }
+        .date-chip i { color: var(--primary); font-size: 11px; }
+
+        .greeting-chip {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 7px 14px;
+            font-size: 12px; font-weight: 600; color: var(--text-secondary);
+        }
+
+        .theme-btn {
+            background: var(--card-bg); border: 1px solid var(--border);
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-secondary); font-size: 14px;
+            transition: all 0.2s;
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+        /* ===================================================
+           WELCOME BANNER
+        =================================================== */
+        .welcome-section {
+            background: linear-gradient(135deg, #ff8c42 0%, var(--primary) 40%, var(--primary-dark) 100%);
+            border-radius: 18px;
+            padding: 22px 28px;
+            margin-bottom: 22px;
+            display: flex; align-items: center; justify-content: space-between;
+            color: white;
+            position: relative; overflow: hidden;
+            box-shadow: 0 8px 32px rgba(249,115,22,0.3);
+        }
+        .welcome-section::before {
+            content: '';
+            position: absolute; right: -30px; top: -30px;
+            width: 160px; height: 160px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .welcome-section::after {
+            content: '';
+            position: absolute; right: 60px; bottom: -50px;
+            width: 120px; height: 120px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 50%;
+        }
+        .welcome-section-geo {
+            position: absolute; left: 50%; top: -20px;
+            width: 80px; height: 80px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .welcome-text h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px; font-weight: 800; margin-bottom: 5px;
+            letter-spacing: -0.2px;
+        }
+        .welcome-text p { font-size: 12px; opacity: 0.82; font-weight: 500; }
+        .welcome-icon { font-size: 46px; opacity: 0.9; position: relative; z-index: 1; }
+
+        /* ===================================================
+           STATS GRID
+        =================================================== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 14px;
+            margin-bottom: 24px;
         }
-        
         .stat-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px;
-            transition: all 0.2s;
+            border-radius: 16px;
+            padding: 18px;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
         }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-        
-        .stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .stat-header i { font-size: 20px; color: var(--primary); }
-        .stat-value { font-size: 22px; font-weight: 700; color: var(--text-primary); }
-        .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
-        
-        /* Dashboard Grid - Compact */
+        .stat-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(249,115,22,0.1);
+        }
+        .stat-card:hover::before { opacity: 1; background: linear-gradient(90deg, var(--primary), var(--primary-dark)); }
+        .stat-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .stat-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px;
+        }
+        .stat-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 30px; font-weight: 900; color: var(--text-primary); line-height: 1;
+            letter-spacing: -1px;
+        }
+        .stat-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-top: 5px; }
+        .stat-sub { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+        /* ===================================================
+           SECTION HEADER
+        =================================================== */
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .section-header h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px; font-weight: 800; color: var(--text-primary);
+        }
+
+        /* ===================================================
+           DASHBOARD CARDS
+        =================================================== */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 14px;
-            margin-top: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px;
         }
-        
         .dash-card {
             background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.2s;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            transition: all 0.28s cubic-bezier(0.22,1,0.36,1);
             cursor: pointer;
             text-decoration: none;
             color: inherit;
             display: block;
+            position: relative;
+            overflow: hidden;
         }
-        .dash-card:hover { transform: translateY(-2px); border-color: var(--primary); box-shadow: var(--shadow); }
-        
-        .dash-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(249,115,22,0.1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            margin-bottom: 10px;
+        .dash-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(249,115,22,0.04), transparent);
+            opacity: 0;
+            transition: opacity 0.28s;
+            border-radius: 16px;
         }
-        .dash-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-        .dash-card p { color: var(--text-secondary); font-size: 11px; margin-bottom: 10px; line-height: 1.4; }
-        
-        .dash-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .dash-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(249,115,22,0.5);
+            box-shadow: 0 12px 32px rgba(249,115,22,0.14);
+        }
+        .dash-card:hover::after { opacity: 1; }
+
+        .dash-accent {
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            transform: scaleX(0);
+            transition: transform 0.28s;
+            transform-origin: left;
+        }
+        .dash-card:hover .dash-accent { transform: scaleX(1); }
+
+        .dash-icon-wrap {
+            width: 50px; height: 50px;
+            background: linear-gradient(135deg, rgba(249,115,22,0.12), rgba(249,115,22,0.06));
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(249,115,22,0.15);
+        }
+        .dash-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 15px; font-weight: 700; margin-bottom: 7px; color: var(--text-primary);
+        }
+        .dash-card p { color: var(--text-secondary); font-size: 12px; margin-bottom: 16px; line-height: 1.55; font-weight: 500; }
+
+        .dash-footer { display: flex; align-items: center; justify-content: space-between; }
         .dash-tag {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+        .dash-open {
+            font-size: 11px; font-weight: 700; color: var(--primary);
+            display: flex; align-items: center; gap: 5px;
+            transition: gap 0.2s;
+        }
+        .dash-card:hover .dash-open { gap: 8px; }
+
+        /* ===================================================
+           SEARCH
+        =================================================== */
+        .search-wrap {
+            position: relative;
+            margin-bottom: 18px;
+        }
+        .search-wrap i {
+            position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 13px;
+        }
+        .search-wrap input {
+            width: 100%; padding: 11px 14px 11px 38px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 13px; font-family: inherit; font-weight: 500;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            transition: all 0.25s;
+        }
+        .search-wrap input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+
+        /* ===================================================
+           ADMIN / MASTER PANELS
+        =================================================== */
+        .admin-card, .master-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 16px;
+        }
+        .master-card {
+            border: 2px solid rgba(139,92,246,0.3);
+            background: linear-gradient(135deg, var(--card-bg), rgba(139,92,246,0.04));
+        }
+        .admin-card h3, .master-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 14px; font-weight: 800; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .admin-card h3 i { color: var(--primary); }
+        .master-card h3 i { color: var(--purple); }
+
+        .add-user-form, .add-dashboard-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .add-user-form input, .add-user-form select,
+        .add-dashboard-form input, .add-dashboard-form select {
+            padding: 9px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 500;
+            transition: border-color 0.2s;
+        }
+        .add-user-form input:focus, .add-user-form select:focus,
+        .add-dashboard-form input:focus, .add-dashboard-form select:focus {
+            outline: none; border-color: var(--primary);
+        }
+
+        .admin-table, .dashboard-table {
+            width: 100%; border-collapse: collapse; font-size: 12px;
+        }
+        .admin-table th, .dashboard-table th {
+            padding: 10px 14px; text-align: left; background: var(--bg-secondary);
+            font-weight: 700; font-size: 10px; color: var(--text-secondary);
+            letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        .admin-table th:first-child { border-radius: 8px 0 0 8px; }
+        .admin-table th:last-child { border-radius: 0 8px 8px 0; }
+        .admin-table td, .dashboard-table td {
+            padding: 11px 14px; border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+        .admin-table tr:last-child td, .dashboard-table tr:last-child td { border-bottom: none; }
+        .admin-table tr:hover td, .dashboard-table tr:hover td { background: var(--bg-secondary); }
+
+        .role-badge {
+            padding: 3px 9px; border-radius: 20px;
+            font-size: 10px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .role-admin { background: rgba(249,115,22,0.12); color: var(--primary); }
+        .role-manager { background: rgba(59,130,246,0.12); color: var(--info); }
+        .role-employee { background: rgba(16,185,129,0.12); color: var(--success); }
+        .role-master { background: rgba(139,92,246,0.12); color: var(--purple); }
+
+        .perm-badge {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 7px;
+            border-radius: 8px;
+            font-size: 9px; font-weight: 700;
+            margin: 2px; cursor: pointer;
+        }
+
+        .tbl-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 5px 7px; border-radius: 6px; font-size: 13px;
+            transition: all 0.2s; font-family: inherit;
+        }
+        .tbl-btn-edit { color: var(--info); }
+        .tbl-btn-edit:hover { background: rgba(59,130,246,0.1); }
+        .tbl-btn-delete { color: var(--danger); }
+        .tbl-btn-delete:hover { background: rgba(239,68,68,0.1); }
+
+        .add-btn {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none; border-radius: 10px;
+            font-size: 12px; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 2px 10px rgba(249,115,22,0.25);
+        }
+        .add-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(249,115,22,0.35); }
+
+        .master-btn {
+            background: linear-gradient(135deg, var(--purple), #7c3aed);
+            box-shadow: 0 2px 10px rgba(139,92,246,0.25);
+        }
+        .master-btn:hover { box-shadow: 0 6px 18px rgba(139,92,246,0.4); }
+
+        /* ===================================================
+           MODAL
+        =================================================== */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(6px);
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 26px;
+            max-width: 420px; width: 100%;
+            max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-header h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 17px; font-weight: 800;
+        }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+        .perm-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-radius: 10px;
             background: var(--bg-secondary);
+            margin-bottom: 8px; cursor: pointer;
+            border: 1.5px solid var(--border);
+            transition: all 0.2s;
+        }
+        .perm-item:hover { border-color: var(--primary); background: var(--primary-light); }
+        .perm-item input { accent-color: var(--primary); width: 15px; height: 15px; cursor: pointer; }
+        .perm-item span { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+        .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+        .btn-save { flex: 1; padding: 11px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
+        .btn-cancel { flex: 1; padding: 11px; background: var(--bg-secondary); color: var(--text-secondary); border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
+
+        /* ===================================================
+           TOAST
+        =================================================== */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            padding: 13px 22px; border-radius: 12px;
+            font-size: 13px; font-weight: 700;
+            color: white; z-index: 9999;
+            transform: translateY(100px); opacity: 0;
+            transition: all 0.35s cubic-bezier(0.22,1,0.36,1);
+            max-width: 340px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--info); }
+
+        /* ===================================================
+           MOBILE
+        =================================================== */
+        .menu-toggle { display: none; }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); box-shadow: 10px 0 40px rgba(0,0,0,0.15); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 12px; padding-top: 64px; }
+            .menu-toggle {
+                display: flex; align-items: center; justify-content: center;
+                position: fixed; top: 12px; left: 12px; z-index: 101;
+                background: var(--card-bg); border: 1px solid var(--border);
+                width: 40px; height: 40px; border-radius: 10px; cursor: pointer;
+                font-size: 16px; color: var(--text-primary);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .top-right { gap: 6px; }
+            .date-chip { display: none; }
+        }
+
+        .loader { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.5); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); grid-column: 1/-1; }
+        .empty-state i { font-size: 42px; margin-bottom: 14px; opacity: 0.3; display: block; }
+        .empty-state p { font-size: 13px; font-weight: 600; }
+
+        .badge-master {
+            background: var(--purple);
+            color: white;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 9px;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-        
-        /* Search Box */
-        .search-box {
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .search-box input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1.5px solid var(--border);
-            border-radius: 8px;
-            font-size: 13px;
-            background: var(--input-bg);
-            color: var(--text-primary);
-        }
-        .search-box input:focus { outline: none; border-color: var(--primary); }
-        
-        .theme-toggle {
-            background: none;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            color: var(--text-secondary);
-            padding: 6px;
-            border-radius: 50%;
-        }
-        
-        /* Admin Panel - Compact */
-        .admin-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        .admin-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
-        
-        .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .admin-table th, .admin-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
-        .admin-table th { background: var(--bg-secondary); font-weight: 600; color: var(--text-secondary); }
-        
-        .add-user-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-            margin-top: 12px;
-        }
-        .add-user-form input, .add-user-form select {
-            padding: 8px 10px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--input-bg);
-            color: var(--text-primary);
-            font-size: 12px;
-        }
-        
-        .permission-badge {
-            background: var(--primary);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 8px;
-            font-size: 9px;
-            margin: 2px;
-            display: inline-block;
-            cursor: pointer;
-        }
-        
-        .edit-user-btn, .delete-user-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .edit-user-btn { color: var(--info); }
-        .delete-user-btn { color: var(--danger); }
-        
-        .menu-toggle { display: none; }
-        
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); width: 260px; }
-            .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 12px; padding-top: 60px; }
-            .menu-toggle { display: block; position: fixed; top: 12px; left: 12px; z-index: 101; background: var(--card-bg); border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; cursor: pointer; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        
-        .logout-btn {
-            width: 100%;
-            padding: 8px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 8px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .sync-status {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 9px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-        .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
-        
-        .welcome-section {
-            background: linear-gradient(135deg, rgba(249,115,22,0.08), rgba(249,115,22,0.02));
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
-        .welcome-section h2 { font-size: 16px; margin-bottom: 4px; }
-        .welcome-section p { font-size: 12px; color: var(--text-secondary); }
-        
-        .loader { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 1000; display: flex;
-            align-items: center; justify-content: center;
-        }
-        .modal-content {
-            background: var(--card-bg); border-radius: 16px; padding: 20px;
-            max-width: 450px; width: 90%; max-height: 80vh; overflow-y: auto;
-        }
-        .perm-checkbox {
-            display: flex; align-items: center; gap: 8px; margin: 8px 0;
-            padding: 6px; border-radius: 6px; background: var(--bg-secondary);
-            font-size: 13px;
+            font-weight: 700;
+            margin-left: 6px;
         }
     </style>
 </head>
 <body>
-    <!-- LOGIN PAGE -->
-    <div id="loginContainer" class="login-container">
-        <div class="login-card">
-            <div class="logo-area">
-                <div class="logo-icon">
-                    <img src="https://scontent-del2-1.xx.fbcdn.net/v/t39.30808-6/534611514_1235415165264845_2208459975921738239_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=sX96yephL5gQ7kNvwERcUOr&_nc_oc=AdpcZQOtRSxD5JfG92jMlWy0-fXmPf8nIRjG_mYayiQiAEezRuVmWtYUNxFP0TDbvVw&_nc_zt=23&_nc_ht=scontent-del2-1.xx&_nc_gid=VWiK3UZ_B2hEuTuLWb34Cw&_nc_ss=7b289&oh=00_Af13Ln51pRa0256tOiUsLtT6UnN2o5Z-sAWDOqLnpIwImg&oe=69F63F90" alt="COLT Logo" style="width:60px;height:60px;border-radius:16px;object-fit:cover;">
-                </div>
-                <h1>COLT Equipment</h1>
-                <p>Internal Operations Portal</p>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="loginContainer" class="login-container">
+    <!-- Left decorative panel -->
+    <div class="login-left">
+        <div class="login-geo login-geo-1"></div>
+        <div class="login-geo login-geo-2"></div>
+        <div class="login-geo login-geo-3"></div>
+
+        <div class="login-brand">
+            <div class="login-brand-logo">
+                <img src="https://scontent-del2-1.xx.fbcdn.net/v/t39.30808-6/534611514_1235415165264845_2208459975921738239_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=sX96yephL5gQ7kNvwERcUOr&_nc_oc=AdpcZQOtRSxD5JfG92jMlWy0-fXmPf8nIRjG_mYayiQiAEezRuVmWtYUNxFP0TDbvVw&_nc_zt=23&_nc_ht=scontent-del2-1.xx&_nc_gid=VWiK3UZ_B2hEuTuLWb34Cw&_nc_ss=7b289&oh=00_Af13Ln51pRa0256tOiUsLtT6UnN2o5Z-sAWDOqLnpIwImg&oe=69F63F90" alt="COLT Logo" onerror="this.parentElement.innerHTML='<div style=\'font-size:36px;line-height:90px;text-align:center\'>🏗️</div>'">
             </div>
-            
-            <div class="input-group">
-                <label><i class="fas fa-user"></i> Username</label>
-                <input type="text" id="username" placeholder="Enter username" autocomplete="off">
-            </div>
-            <div class="input-group">
-                <label><i class="fas fa-lock"></i> Password</label>
-                <input type="password" id="password" placeholder="Enter password">
-            </div>
-            <button class="login-btn" id="loginBtn">Login →</button>
-            <div id="errorMsg" class="login-error"></div>
+            <h1>COLT <span>Equipment</span></h1>
+            <p>Internal Operations Portal</p>
+        </div>
+
+        <div class="login-tagline">
+            <h2>Your Command Center for Operations</h2>
+            <p>Access all your dashboards, analytics, and reports from one unified workspace.</p>
+        </div>
+
+        <div class="login-pills">
+            <div class="login-pill">📊 Analytics</div>
+            <div class="login-pill">🔧 Operations</div>
+            <div class="login-pill">📈 Reports</div>
         </div>
     </div>
 
-    <!-- DASHBOARD -->
-    <div id="dashboardContainer" class="dashboard-container">
-        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <!-- Right form panel -->
+    <div class="login-right">
+        <div class="login-form-header">
+            <h2>Welcome back 👋</h2>
+            <p>Sign in to access your workspace</p>
+            <div class="login-divider"></div>
+        </div>
 
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <img src="https://scontent-del2-1.xx.fbcdn.net/v/t39.30808-6/534611514_1235415165264845_2208459975921738239_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=sX96yephL5gQ7kNvwERcUOr&_nc_oc=AdpcZQOtRSxD5JfG92jMlWy0-fXmPf8nIRjG_mYayiQiAEezRuVmWtYUNxFP0TDbvVw&_nc_zt=23&_nc_ht=scontent-del2-1.xx&_nc_gid=VWiK3UZ_B2hEuTuLWb34Cw&_nc_ss=7b289&oh=00_Af13Ln51pRa0256tOiUsLtT6UnN2o5Z-sAWDOqLnpIwImg&oe=69F63F90" alt="logo">
-                <div><h2>COLT Equipment</h2><p>Portal</p></div>
-            </div>
-            
-            <div class="nav-item active" onclick="showPage('home')">
-                <i class="fas fa-home"></i><span>Home</span>
-            </div>
-            <div class="nav-item" onclick="showPage('dashboards')">
-                <i class="fas fa-th-large"></i><span>Dashboards</span>
-            </div>
-            <div class="nav-item" id="adminNavItem" onclick="showPage('admin')" style="display: none;">
-                <i class="fas fa-users-cog"></i><span>Admin</span>
-            </div>
-            
-            <div class="user-section">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                    <div class="user-avatar" id="userAvatar">A</div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);" id="userName">User</div>
-                        <div style="font-size: 10px; color: var(--text-secondary);" id="userRole">Role</div>
-                    </div>
-                </div>
-                <div class="sync-status">
-                    <div class="sync-dot" id="syncDot"></div>
-                    <span id="syncText">Connected</span>
-                </div>
-                <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <div class="input-group">
+            <label><i class="fas fa-user"></i> Username</label>
+            <div class="input-wrap">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="username" placeholder="Enter your username" autocomplete="off">
             </div>
         </div>
 
-        <div class="main-content">
-            <div class="top-bar">
-                <div class="page-title">
-                    <h1 id="pageTitle">Home</h1>
-                    <p id="pageSubtitle">Welcome to COLT Equipment Portal</p>
+        <div class="input-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <div class="input-wrap">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+            </div>
+        </div>
+
+        <button class="login-btn" id="loginBtn">Sign In →</button>
+        <div id="errorMsg" class="login-error"></div>
+
+        <div class="login-footer-note">
+            <span>COLT Equipment</span> · Internal Portal · Secure Access
+        </div>
+    </div>
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboardContainer" class="dashboard-container">
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <img class="sidebar-logo-img" src="https://scontent-del2-1.xx.fbcdn.net/v/t39.30808-6/534611514_1235415165264845_2208459975921738239_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=1d70fc&_nc_ohc=sX96yephL5gQ7kNvwERcUOr&_nc_oc=AdpcZQOtRSxD5JfG92jMlWy0-fXmPf8nIRjG_mYayiQiAEezRuVmWtYUNxFP0TDbvVw&_nc_zt=23&_nc_ht=scontent-del2-1.xx&_nc_gid=VWiK3UZ_B2hEuTuLWb34Cw&_nc_ss=7b289&oh=00_Af13Ln51pRa0256tOiUsLtT6UnN2o5Z-sAWDOqLnpIwImg&oe=69F63F90" alt="Logo" onerror="this.style.display='none'">
+            <div><h2>COLT Equipment</h2><p>Portal v2</p></div>
+        </div>
+
+        <div class="nav-section-label">Navigation</div>
+        <div class="nav-item active" id="navHome" onclick="showPage('home')">
+            <i class="fas fa-home"></i><span>Home</span>
+        </div>
+        <div class="nav-item" id="navDashboards" onclick="showPage('dashboards')">
+            <i class="fas fa-th-large"></i><span>Dashboards</span>
+        </div>
+        <div class="nav-item" id="adminNavItem" onclick="showPage('admin')" style="display:none;">
+            <i class="fas fa-users-cog"></i><span>Admin</span>
+        </div>
+        <div class="nav-item" id="masterNavItem" onclick="showPage('master')" style="display:none;">
+            <i class="fas fa-crown"></i><span>Master Panel <span class="badge-master">Super</span></span>
+        </div>
+
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">A</div>
+                <div>
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-role" id="userRole">Role</div>
                 </div>
-                <div class="user-menu">
-                    <span id="greeting" style="font-size: 13px;"></span>
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-moon" id="themeIcon"></i>
+            </div>
+            <div class="sync-status">
+                <div class="sync-dot"></div>
+                <span>Connected to Supabase</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="page-title">
+                <h1 id="pageTitle">Home</h1>
+                <p id="pageSubtitle">Welcome to COLT Equipment Portal</p>
+            </div>
+            <div class="top-right">
+                <div class="date-chip">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+                <div class="greeting-chip">
+                    <span id="greeting">👋</span>
+                </div>
+                <button class="theme-btn" onclick="toggleTheme()">
+                    <i id="themeIcon" class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- HOME PAGE -->
+        <div id="homePage">
+            <div class="welcome-section">
+                <div class="welcome-section-geo"></div>
+                <div class="welcome-text">
+                    <h2 id="welcomeMsg">Good Morning! 🌤️</h2>
+                    <p>Your centralized hub for operational dashboards & analytics</p>
+                </div>
+                <div class="welcome-icon">🏗️</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon" style="background:rgba(249,115,22,0.1);color:var(--primary);">
+                            <i class="fas fa-th-large"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="statTotalDashboards">0</div>
+                    <div class="stat-label">My Dashboards</div>
+                    <div class="stat-sub">Accessible to you</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon" style="background:rgba(16,185,129,0.1);color:var(--success);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="statTodayVisits">0</div>
+                    <div class="stat-label">Today's Visits</div>
+                    <div class="stat-sub" id="statTodayDate">—</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon" style="background:rgba(59,130,246,0.1);color:var(--info);">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="statTotalVisits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                    <div class="stat-sub">All time logins</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-icon" style="background:rgba(245,158,11,0.1);color:var(--warning);">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="statActiveUsers">0</div>
+                    <div class="stat-label">Active Users</div>
+                    <div class="stat-sub">Registered accounts</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <h3>📊 Quick Access Dashboards</h3>
+            </div>
+            <div class="search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="homeSearch" placeholder="Search dashboards..." oninput="renderHomePage()">
+            </div>
+            <div class="dashboard-grid" id="homeDashboardsGrid"></div>
+        </div>
+
+        <!-- DASHBOARDS PAGE -->
+        <div id="dashboardsListPage" style="display:none;">
+            <div class="search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" id="dashSearch" placeholder="Search all dashboards..." oninput="renderAllDashboards()">
+            </div>
+            <div class="dashboard-grid" id="allDashboardsGrid"></div>
+        </div>
+
+        <!-- ADMIN PAGE -->
+        <div id="adminPage" style="display:none;">
+            <div class="admin-card">
+                <h3><i class="fas fa-user-plus"></i> Add New User</h3>
+                <div class="add-user-form">
+                    <input type="text" id="newUsername" placeholder="Username">
+                    <input type="text" id="newName" placeholder="Full Name">
+                    <input type="password" id="newPassword" placeholder="Password">
+                    <select id="newRole">
+                        <option value="employee">Employee</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button class="add-btn" onclick="addUser()"><i class="fas fa-plus"></i> Add User</button>
+                </div>
+            </div>
+            <div class="admin-card">
+                <h3><i class="fas fa-users"></i> Manage Users & Permissions</h3>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Dashboard Access</th><th>Actions</th></tr></thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MASTER PANEL -->
+        <div id="masterPage" style="display:none;">
+            <div class="master-card">
+                <h3><i class="fas fa-crown"></i> Master Panel — Add New Dashboard</h3>
+                <div class="add-dashboard-form">
+                    <input type="text" id="newDashTitle" placeholder="Dashboard Title">
+                    <input type="text" id="newDashDesc" placeholder="Description">
+                    <input type="text" id="newDashIcon" placeholder="Icon (e.g., 📊)">
+                    <input type="text" id="newDashUrl" placeholder="Dashboard URL (https://...)">
+                    <input type="text" id="newDashCategory" placeholder="Category">
+                    <button class="add-btn master-btn" onclick="addDashboard()"><i class="fas fa-plus"></i> Add Dashboard</button>
+                </div>
+            </div>
+            <div class="admin-card">
+                <h3><i class="fas fa-th-large"></i> Manage All Dashboards</h3>
+                <div style="overflow-x:auto;">
+                    <table class="dashboard-table">
+                        <thead><tr><th>ID</th><th>Title</th><th>Category</th><th>URL</th><th>Actions</th></tr></thead>
+                        <tbody id="dashboardsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="admin-card" style="margin-top:16px;">
+                <h3><i class="fas fa-users"></i> All Users (Master View)</h3>
+                <div style="overflow-x:auto;">
+                    <table class="admin-table">
+                        <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Dashboard Access</th><th>Actions</th></tr></thead>
+                        <tbody id="masterUsersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function() {
+    const SUPABASE_URL = "https://qivpnzbogntgmtubhysu.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpdnBuemJvZ250Z210dWJoeXN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNTkyNTEsImV4cCI6MjA5MjkzNTI1MX0.Gtie47UrCsEd71R2QePJkcyWxe2gbDsrEcWXwEE4XAw";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const MASTER_CREDENTIALS = { username: "Sunny", password: "10145" };
+
+    let allDashboards = [];
+    let allUsers = [];
+    let currentUser = null;
+
+    function resetAllState() {
+        currentUser = null;
+        allDashboards = [];
+        allUsers = [];
+
+        ['homeDashboardsGrid','allDashboardsGrid','usersTableBody','masterUsersTableBody','dashboardsTableBody'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        });
+
+        ['statTotalDashboards','statTodayVisits','statTotalVisits','statActiveUsers'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '0';
+        });
+
+        ['homeSearch','dashSearch'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+        document.getElementById('adminNavItem').style.display = 'none';
+        document.getElementById('masterNavItem').style.display = 'none';
+
+        ['homePage','dashboardsListPage','adminPage','masterPage'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        const homeEl = document.getElementById('homePage');
+        if (homeEl) homeEl.style.display = 'block';
+
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        const navHome = document.getElementById('navHome');
+        if (navHome) navHome.classList.add('active');
+
+        const pt = document.getElementById('pageTitle'); if (pt) pt.textContent = 'Home';
+        const ps = document.getElementById('pageSubtitle'); if (ps) ps.textContent = 'Welcome to COLT Equipment Portal';
+        const ua = document.getElementById('userAvatar'); if (ua) ua.textContent = '?';
+        const un = document.getElementById('userName'); if (un) un.textContent = 'User';
+        const ur = document.getElementById('userRole'); if (ur) ur.textContent = 'Role';
+        const gr = document.getElementById('greeting'); if (gr) gr.textContent = '👋';
+    }
+
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => { t.classList.remove('show'); }, 3500);
+    }
+
+    const today = new Date().toDateString();
+
+    function getVisitData() {
+        try { return JSON.parse(localStorage.getItem('colt_visits')) || { today: 0, total: 0, lastDate: '' }; }
+        catch(e) { return { today: 0, total: 0, lastDate: '' }; }
+    }
+
+    function recordVisit() {
+        let data = getVisitData();
+        if (data.lastDate !== today) { data.today = 0; data.lastDate = today; }
+        data.today += 1; data.total += 1;
+        localStorage.setItem('colt_visits', JSON.stringify(data));
+        return data;
+    }
+
+    function getFormattedDate() {
+        const d = new Date();
+        const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function getWelcomeGreeting() {
+        const h = new Date().getHours();
+        if (h < 12) return 'Good Morning! 🌤️';
+        if (h < 17) return 'Good Afternoon! ☀️';
+        return 'Good Evening! 🌙';
+    }
+
+    async function loadDashboards() {
+        try {
+            const { data, error } = await supabase.from('dashboards').select('*').order('id');
+            if (error) throw error;
+            allDashboards = data || [];
+        } catch(e) { console.error('Dashboard load error:', e.message); allDashboards = []; }
+        return allDashboards;
+    }
+
+    async function loadUsers() {
+        try {
+            const { data, error } = await supabase.from('users').select('*').order('id');
+            if (error) throw error;
+            allUsers = data || [];
+        } catch(e) { console.error('User load error:', e.message); allUsers = []; }
+        return allUsers;
+    }
+
+    window.addDashboard = async function() {
+        if (currentUser?.role !== 'master') { showToast('❌ Permission denied!', 'error'); return; }
+        const title = document.getElementById('newDashTitle').value.trim();
+        const desc = document.getElementById('newDashDesc').value.trim();
+        const icon = document.getElementById('newDashIcon').value.trim() || '📊';
+        const url = document.getElementById('newDashUrl').value.trim();
+        const category = document.getElementById('newDashCategory').value.trim() || 'General';
+        if (!title || !url) { showToast('⚠️ Title aur URL zaroori hain!', 'error'); return; }
+        if (!url.startsWith('http')) { showToast('⚠️ Valid URL daalo (https://...)', 'error'); return; }
+        try {
+            const { error } = await supabase.from('dashboards').insert([{ title, description: desc, icon, url, category, is_active: true }]).select();
+            if (error) throw error;
+            showToast('✅ Dashboard add ho gaya!');
+            ['newDashTitle','newDashDesc','newDashIcon','newDashUrl','newDashCategory'].forEach(id => { document.getElementById(id).value = ''; });
+            await loadDashboards();
+            renderDashboardsTable(); renderMasterUsersTable(); renderHomePage(); renderAllDashboards();
+        } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+    };
+
+    window.deleteDashboard = async function(dashId) {
+        if (currentUser?.role !== 'master') { showToast('❌ Permission denied!', 'error'); return; }
+        if (!confirm('Kya aap sure hain? Yeh dashboard delete ho jayega.')) return;
+        try {
+            const { error } = await supabase.from('dashboards').delete().eq('id', dashId);
+            if (error) throw error;
+            showToast('✅ Dashboard delete ho gaya!');
+            await loadDashboards();
+            renderDashboardsTable(); renderHomePage(); renderAllDashboards();
+        } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+    };
+
+    window.addUser = async function() {
+        if (currentUser?.role !== 'admin' && currentUser?.role !== 'master') { showToast('❌ Permission denied!', 'error'); return; }
+        const username = document.getElementById('newUsername').value.trim();
+        const name = document.getElementById('newName').value.trim();
+        const password = document.getElementById('newPassword').value.trim();
+        const role = document.getElementById('newRole').value;
+        if (!username || !name || !password) { showToast('⚠️ Saare fields bharo!', 'error'); return; }
+        if (allUsers.find(u => u.username === username)) { showToast('⚠️ Username already exist karta hai!', 'error'); return; }
+        const defaultIds = allDashboards.map(d => d.id);
+        try {
+            const { error } = await supabase.from('users').insert([{ username, name, password, role, dashboard_ids: defaultIds, is_active: true }]);
+            if (error) throw error;
+            showToast('✅ User add ho gaya!');
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newName').value = '';
+            document.getElementById('newPassword').value = '';
+            await loadUsers();
+            renderUsersTable(); renderMasterUsersTable();
+        } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+    };
+
+    window.deleteUser = async function(userId) {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) return;
+        if (user.username === 'admin') { showToast('❌ Admin ko delete nahi kar sakte!', 'error'); return; }
+        if (!confirm(`"${user.name}" ko delete karna chahte hain?`)) return;
+        try {
+            const { error } = await supabase.from('users').delete().eq('id', userId);
+            if (error) throw error;
+            showToast('✅ User delete ho gaya!');
+            await loadUsers(); renderUsersTable(); renderMasterUsersTable();
+        } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+    };
+
+    window.toggleUserStatus = async function(userId) {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user || user.username === 'admin') { showToast('❌ Yeh action allowed nahi!', 'error'); return; }
+        try {
+            const { error } = await supabase.from('users').update({ is_active: !user.is_active }).eq('id', userId);
+            if (error) throw error;
+            showToast(`✅ User ${!user.is_active ? 'activate' : 'deactivate'} ho gaya!`);
+            await loadUsers(); renderUsersTable(); renderMasterUsersTable();
+        } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+    };
+
+    window.savePermissions = async function(userId) {
+        const checkboxes = document.querySelectorAll('#permList input[type="checkbox"]');
+        const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+        try {
+            const { error } = await supabase.from('users').update({ dashboard_ids: selected }).eq('id', userId);
+            if (error) throw error;
+            if (currentUser?.id === userId) {
+                currentUser.dashboard_ids = selected;
+                sessionStorage.setItem('colt_session', JSON.stringify(currentUser));
+            }
+            showToast('✅ Permissions save ho gayi!');
+            await loadUsers(); renderUsersTable(); renderMasterUsersTable();
+            document.querySelector('.modal-overlay')?.remove();
+        } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
+    };
+
+    window.openPermissionEditor = function(userId) {
+        const user = allUsers.find(u => u.id === userId);
+        if (!user) return;
+        const userDashIds = user.dashboard_ids || [];
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>🔑 Permissions: ${escHtml(user.name)}</h3>
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+                </div>
+                <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Is user ko kaunse dashboards dikhne chahiye?</p>
+                <div id="permList">
+                    ${allDashboards.length === 0
+                        ? '<p style="color:var(--text-muted);font-size:12px;">Koi dashboard nahi mila.</p>'
+                        : allDashboards.map(d => `
+                        <label class="perm-item">
+                            <input type="checkbox" value="${d.id}" ${userDashIds.includes(d.id) ? 'checked' : ''}>
+                            <span>${d.icon || '📊'} ${escHtml(d.title)} <small style="color:var(--text-muted);">(${escHtml(d.category)})</small></span>
+                        </label>
+                    `).join('')}
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-save" onclick="savePermissions(${userId})">💾 Save</button>
+                    <button class="btn-cancel" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+    };
+
+    function getUserDashboards(user) {
+        if (!user) return [];
+        if (user.role === 'admin' || user.role === 'master') return allDashboards;
+        const ids = user.dashboard_ids || [];
+        return allDashboards.filter(d => ids.includes(d.id));
+    }
+
+    function renderDashboardsTable() {
+        const tbody = document.getElementById('dashboardsTableBody');
+        if (!tbody) return;
+        if (!allDashboards.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Koi dashboard nahi mila</td></tr>';
+            return;
+        }
+        tbody.innerHTML = allDashboards.map(d => `
+            <tr>
+                <td>${d.id}</td>
+                <td><strong>${escHtml(d.icon || '📊')} ${escHtml(d.title)}</strong></td>
+                <td><span class="dash-tag">${escHtml(d.category || 'General')}</span></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(d.url)}">
+                    <a href="${escHtml(d.url)}" target="_blank" style="color:var(--primary);font-size:11px;">${escHtml(d.url.substring(0,40))}...</a>
+                </td>
+                <td><button class="tbl-btn tbl-btn-delete" onclick="deleteDashboard(${d.id})"><i class="fas fa-trash"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
+    function renderUsersTable() { renderUsersIntoTable('usersTableBody', false); }
+    function renderMasterUsersTable() { renderUsersIntoTable('masterUsersTableBody', true); }
+
+    function renderUsersIntoTable(tbodyId, showAll) {
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        const usersToShow = showAll ? allUsers : allUsers.filter(u => u.is_active);
+        if (!usersToShow.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted);">Koi user nahi mila</td></tr>';
+            return;
+        }
+        tbody.innerHTML = usersToShow.map(user => {
+            const userDashIds = user.dashboard_ids || [];
+            const perms = userDashIds.map(id => {
+                const d = allDashboards.find(dd => dd.id === id);
+                return d ? `<span class="perm-badge" onclick="openPermissionEditor(${user.id})">${escHtml(d.title.substring(0, 14))}</span>` : '';
+            }).filter(Boolean).join('');
+            const statusDot = user.is_active
+                ? '<span style="color:var(--success);font-size:10px;">● Active</span>'
+                : '<span style="color:var(--danger);font-size:10px;">● Inactive</span>';
+            return `<tr style="${!user.is_active ? 'opacity:0.5;' : ''}">
+                <td><strong>${escHtml(user.username)}</strong><br>${statusDot}</td>
+                <td>${escHtml(user.name)}</td>
+                <td><span class="role-badge role-${user.role}">${user.role}</span></td>
+                <td>
+                    ${perms || '<span style="color:var(--text-muted);font-size:11px;">No access</span>'}
+                    <br><button onclick="openPermissionEditor(${user.id})" style="background:none;border:none;color:var(--primary);font-size:10px;cursor:pointer;padding:2px 0;font-weight:700;">✏️ Edit Access</button>
+                </td>
+                <td>
+                    <button class="tbl-btn tbl-btn-edit" title="${user.is_active ? 'Deactivate' : 'Activate'}" onclick="toggleUserStatus(${user.id})">
+                        <i class="fas fa-${user.is_active ? 'ban' : 'check-circle'}"></i>
                     </button>
-                </div>
-            </div>
+                    ${user.username !== 'admin' ? `<button class="tbl-btn tbl-btn-delete" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>` : ''}
+                </td>
+            </tr>`;
+        }).join('');
+    }
 
-            <!-- HOME PAGE -->
-            <div id="homePage">
-                <div class="welcome-section">
-                    <h2><i class="fas fa-microchip"></i> COLT Equipment Portal</h2>
-                    <p>Your centralized hub for operational dashboards and analytics</p>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-header"><div class="stat-value" id="statTotalDashboards">0</div><i class="fas fa-th-large"></i></div><div class="stat-label">Total Dashboards</div></div>
-                    <div class="stat-card"><div class="stat-header"><div class="stat-value" id="statTodayVisits">0</div><i class="fas fa-chart-line"></i></div><div class="stat-label">Today's Visits</div></div>
-                    <div class="stat-card"><div class="stat-header"><div class="stat-value" id="statTotalVisits">0</div><i class="fas fa-eye"></i></div><div class="stat-label">Total Visits</div></div>
-                    <div class="stat-card"><div class="stat-header"><div class="stat-value" id="statActiveUsers">0</div><i class="fas fa-users"></i></div><div class="stat-label">Active Users</div></div>
-                </div>
-                
-                <div class="search-box">
-                    <input type="text" id="homeSearch" placeholder="🔍 Search dashboards..." onkeyup="filterHomeDashboards()">
-                </div>
-                <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 10px;">📊 Quick Access Dashboards</h3>
-                <div class="dashboard-grid" id="homeDashboardsGrid"></div>
-            </div>
+    function renderHomePage() {
+        if (!currentUser) return;
+        const visitData = getVisitData();
+        const userDashboards = getUserDashboards(currentUser);
 
-            <!-- DASHBOARDS PAGE -->
-            <div id="dashboardsListPage" style="display: none;">
-                <div class="search-box">
-                    <input type="text" id="dashSearch" placeholder="🔍 Search dashboards..." onkeyup="filterDashboards()">
-                </div>
-                <div class="dashboard-grid" id="allDashboardsGrid"></div>
-            </div>
-            
-            <!-- ADMIN PAGE -->
-            <div id="adminPage" style="display: none;">
-                <div class="admin-card">
-                    <h3><i class="fas fa-user-plus"></i> Add New User</h3>
-                    <div class="add-user-form">
-                        <input type="text" id="newUsername" placeholder="Username">
-                        <input type="text" id="newName" placeholder="Full Name">
-                        <input type="password" id="newPassword" placeholder="Password">
-                        <select id="newRole">
-                            <option value="employee">Employee</option>
-                            <option value="manager">Manager</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                        <button class="login-btn" onclick="addUser()" style="margin-top:0;padding:8px;">Add User</button>
-                    </div>
-                </div>
-                
-                <div class="admin-card">
-                    <h3><i class="fas fa-users"></i> Manage Users</h3>
-                    <div style="overflow-x: auto;">
-                        <table class="admin-table">
-                            <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Access</th><th>Actions</th></tr></thead>
-                            <tbody id="usersTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+        document.getElementById('statTotalDashboards').textContent = userDashboards.length;
+        document.getElementById('statTodayVisits').textContent = visitData.today;
+        document.getElementById('statTotalVisits').textContent = visitData.total;
+        document.getElementById('statActiveUsers').textContent = allUsers.filter(u => u.is_active).length;
+        document.getElementById('statTodayDate').textContent = getFormattedDate();
 
-    <script>
-        (function() {
-            // ============= SUPABASE CONFIG =============
-            const SUPABASE_URL = "https://qivpnzbogntgmtubhysu.supabase.co";
-            const SUPABASE_ANON_KEY = "sb_publishable_FpnKRZYqc_wtV9uXZxyYog_JU828bVe";
-            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            
-            // Traffic stats
-            let todayVisits = parseInt(localStorage.getItem('colt_today_visits') || '0');
-            let totalVisits = parseInt(localStorage.getItem('colt_total_visits') || '0');
-            let lastVisitDate = localStorage.getItem('colt_last_visit_date') || '';
-            const today = new Date().toDateString();
-            
-            if (lastVisitDate !== today) {
-                todayVisits = 0;
-                localStorage.setItem('colt_last_visit_date', today);
-            }
-            
-            let allUsers = [];
-            let allDashboards = [];
-            let currentUser = null;
-            let dashboardSearchTerm = '';
-            
-            const FALLBACK_DASHBOARDS = [
-                { id: 1, title: "Expense Dashboard", description: "Track company expenses", icon: "💰", url: "#", category: "Finance" },
-                { id: 2, title: "Equipment Tracker", description: "Monitor equipment status", icon: "🔧", url: "#", category: "Operations" },
-                { id: 3, title: "HR Analytics", description: "Employee performance", icon: "👥", url: "#", category: "HR" },
-                { id: 4, title: "Project Dashboard", description: "Project progress", icon: "📊", url: "#", category: "Projects" },
-                { id: 5, title: "Inventory Management", description: "Stock levels", icon: "📦", url: "#", category: "Operations" },
-                { id: 6, title: "Sales Analytics", description: "Revenue performance", icon: "📈", url: "#", category: "Finance" }
-            ];
-            
-            async function loadUsers() {
-                try {
-                    const { data, error } = await supabase.from('users').select('*').order('id');
-                    if (error) throw error;
-                    allUsers = data || [];
-                } catch(e) { console.error(e); }
-                if (currentUser?.role === 'admin') renderUsersTable();
-                document.getElementById('statActiveUsers')?.setAttribute('data-count', allUsers.filter(u=>u.is_active).length);
-            }
-            
-            async function loadDashboards() {
-                try {
-                    const { data, error } = await supabase.from('dashboards').select('*').eq('is_active', true);
-                    if (error) throw error;
-                    allDashboards = (data && data.length) ? data : FALLBACK_DASHBOARDS;
-                } catch(e) { allDashboards = FALLBACK_DASHBOARDS; }
-                renderHomePage();
-                renderAllDashboards();
-            }
-            
-            async function addUser() {
-                const username = document.getElementById('newUsername')?.value.trim();
-                const name = document.getElementById('newName')?.value.trim();
-                const password = document.getElementById('newPassword')?.value.trim();
-                const role = document.getElementById('newRole')?.value;
-                if (!username || !name || !password) return alert('Fill all fields!');
-                if (allUsers.find(u => u.username === username)) return alert('Username exists!');
-                
-                try {
-                    const { error } = await supabase.from('users').insert([{
-                        username, name, password, role, dashboard_ids: [1,2], is_active: true,
-                        created_at: new Date(), updated_at: new Date()
-                    }]);
-                    if (error) throw error;
-                    alert('✅ User added!');
-                    document.getElementById('newUsername').value = '';
-                    document.getElementById('newName').value = '';
-                    document.getElementById('newPassword').value = '';
-                    await loadUsers();
-                    if (currentUser?.role === 'admin') renderUsersTable();
-                } catch(e) { alert('Error: ' + e.message); }
-            }
-            
-            async function updateUserPermissions(userId, dashboardIds) {
-                try {
-                    await supabase.from('users').update({ dashboard_ids: dashboardIds }).eq('id', userId);
-                    await loadUsers();
-                    if (currentUser?.id === userId) { currentUser.dashboard_ids = dashboardIds; localStorage.setItem('colt_user', JSON.stringify(currentUser)); }
-                    if (currentUser?.role === 'admin') renderUsersTable();
-                    alert('✅ Permissions updated!');
-                } catch(e) { alert('Error: ' + e.message); }
-            }
-            
-            async function toggleUserStatus(userId) {
-                const user = allUsers.find(u => u.id === userId);
-                if (user && user.username !== 'admin') {
-                    await supabase.from('users').update({ is_active: !user.is_active }).eq('id', userId);
-                    await loadUsers();
-                    if (currentUser?.role === 'admin') renderUsersTable();
-                    if (currentUser?.id === userId && !user.is_active) logout();
-                }
-            }
-            
-            async function deleteUser(userId) {
-                const user = allUsers.find(u => u.id === userId);
-                if (user && user.username !== 'admin' && confirm(`Delete ${user.name}?`)) {
-                    await supabase.from('users').delete().eq('id', userId);
-                    await loadUsers();
-                    if (currentUser?.role === 'admin') renderUsersTable();
-                }
-            }
-            
-            function openPermissionEditor(userId) {
-                const user = allUsers.find(u => u.id === userId);
-                if (!user) return;
-                const modal = document.createElement('div');
-                modal.className = 'modal-overlay';
-                modal.innerHTML = `
-                    <div class="modal-content">
-                        <div class="modal-header" style="display:flex;justify-content:space-between;margin-bottom:12px;">
-                            <h3>Edit Permissions: ${user.name}</h3>
-                            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;">&times;</button>
-                        </div>
-                        <div id="permList">
-                            ${allDashboards.map(d => `
-                                <label class="perm-checkbox">
-                                    <input type="checkbox" value="${d.id}" ${user.dashboard_ids?.includes(d.id) ? 'checked' : ''}>
-                                    <span>${d.icon} ${d.title} (${d.category})</span>
-                                </label>
-                            `).join('')}
-                        </div>
-                        <div style="margin-top:16px;display:flex;gap:8px;">
-                            <button class="login-btn" onclick="savePermissions(${userId})" style="padding:8px;">Save</button>
-                            <button class="login-btn" style="background:gray;padding:8px;" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-            }
-            
-            window.savePermissions = async function(userId) {
-                const checkboxes = document.querySelectorAll('#permList input[type="checkbox"]');
-                const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => parseInt(cb.value));
-                await updateUserPermissions(userId, selected);
-                document.querySelector('.modal-overlay')?.remove();
-            };
-            
-            function renderUsersTable() {
-                const tbody = document.getElementById('usersTableBody');
-                if (!tbody) return;
-                tbody.innerHTML = allUsers.filter(u => u.is_active).map(user => `
-                    <tr>
-                        <td>${escapeHtml(user.username)}</td><td>${escapeHtml(user.name)}</td><td>${user.role}</td>
-                        <td>${(user.dashboard_ids || [1,2]).map(id => { const d = allDashboards.find(dd => dd.id === id); return d ? `<span class="permission-badge" onclick="openPermissionEditor(${user.id})">${d.title.substring(0,8)} 🖊️</span>` : ''; }).join('')}</td>
-                        <td>
-                            <button class="edit-user-btn" onclick="openPermissionEditor(${user.id})"><i class="fas fa-key"></i></button>
-                            <button class="edit-user-btn" onclick="toggleUserStatus(${user.id})"><i class="fas fa-ban"></i></button>
-                            ${user.username !== 'admin' ? `<button class="delete-user-btn" onclick="deleteUser(${user.id})"><i class="fas fa-trash"></i></button>` : ''}
-                        </td>
-                    </tr>
-                `).join('');
-            }
-            
-            function getUserDashboards(user) {
-                if (!user) return [];
-                if (user.role === 'admin') return allDashboards;
-                const ids = user.dashboard_ids || [1,2];
-                return allDashboards.filter(d => ids.includes(d.id));
-            }
-            
-            function renderHomePage() {
-                const userDashboards = getUserDashboards(currentUser);
-                document.getElementById('statTotalDashboards')?.setAttribute('data-count', userDashboards.length);
-                document.getElementById('statTodayVisits')?.setAttribute('data-count', todayVisits);
-                document.getElementById('statTotalVisits')?.setAttribute('data-count', totalVisits);
-                document.getElementById('statActiveUsers')?.setAttribute('data-count', allUsers.filter(u=>u.is_active).length);
-                
-                document.getElementById('statTotalDashboards').textContent = userDashboards.length;
-                document.getElementById('statTodayVisits').textContent = todayVisits;
-                document.getElementById('statTotalVisits').textContent = totalVisits;
-                document.getElementById('statActiveUsers').textContent = allUsers.filter(u=>u.is_active).length;
-                
-                const grid = document.getElementById('homeDashboardsGrid');
-                const searchTerm = (document.getElementById('homeSearch')?.value || '').toLowerCase();
-                let filtered = userDashboards;
-                if (searchTerm) filtered = userDashboards.filter(d => d.title.toLowerCase().includes(searchTerm) || d.category.toLowerCase().includes(searchTerm));
-                
-                grid.innerHTML = filtered.map(d => `
-                    <a href="${d.url}" class="dash-card" target="_blank">
-                        <div class="dash-icon">${d.icon}</div>
-                        <h3>${escapeHtml(d.title)}</h3>
-                        <p>${escapeHtml(d.description)}</p>
-                        <div class="dash-tags"><span class="dash-tag">${escapeHtml(d.category)}</span></div>
-                    </a>
-                `).join('');
-            }
-            
-            function renderAllDashboards() {
-                const grid = document.getElementById('allDashboardsGrid');
-                const searchTerm = (document.getElementById('dashSearch')?.value || '').toLowerCase();
-                let filtered = allDashboards;
-                if (searchTerm) filtered = allDashboards.filter(d => d.title.toLowerCase().includes(searchTerm) || d.category.toLowerCase().includes(searchTerm));
-                
-                grid.innerHTML = filtered.map(d => `
-                    <div class="dash-card">
-                        <div class="dash-icon">${d.icon}</div>
-                        <h3>${escapeHtml(d.title)}</h3>
-                        <p>${escapeHtml(d.description)}</p>
-                        <div class="dash-tags"><span class="dash-tag">${escapeHtml(d.category)}</span></div>
-                    </div>
-                `).join('');
-            }
-            
-            window.filterHomeDashboards = () => renderHomePage();
-            window.filterDashboards = () => renderAllDashboards();
-            
-            function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-            
-            async function handleLogin() {
-                const username = document.getElementById('username')?.value.trim();
-                const password = document.getElementById('password')?.value.trim();
-                const errorDiv = document.getElementById('errorMsg');
-                if (!username || !password) { errorDiv.textContent = 'Enter username & password!'; errorDiv.style.display = 'block'; return; }
-                errorDiv.style.display = 'none';
-                
+        const searchTerm = (document.getElementById('homeSearch')?.value || '').toLowerCase();
+        const filtered = searchTerm ? userDashboards.filter(d => d.title.toLowerCase().includes(searchTerm) || (d.category || '').toLowerCase().includes(searchTerm)) : userDashboards;
+
+        const grid = document.getElementById('homeDashboardsGrid');
+        if (!filtered.length) {
+            grid.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><p>Koi dashboard nahi mila</p></div>`;
+            return;
+        }
+        grid.innerHTML = filtered.map(d => `
+            <a href="${escHtml(d.url)}" class="dash-card" target="_blank" rel="noopener noreferrer">
+                <div class="dash-accent"></div>
+                <div class="dash-icon-wrap">${d.icon || '📊'}</div>
+                <h3>${escHtml(d.title)}</h3>
+                <p>${escHtml(d.description || 'Click karke dashboard open karein')}</p>
+                <div class="dash-footer">
+                    <span class="dash-tag">${escHtml(d.category || 'General')}</span>
+                    <span class="dash-open"><i class="fas fa-external-link-alt"></i> Open</span>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    function renderAllDashboards() {
+        const searchTerm = (document.getElementById('dashSearch')?.value || '').toLowerCase();
+        const userDashboards = getUserDashboards(currentUser);
+        const filtered = searchTerm ? userDashboards.filter(d => d.title.toLowerCase().includes(searchTerm) || (d.category || '').toLowerCase().includes(searchTerm)) : userDashboards;
+
+        const grid = document.getElementById('allDashboardsGrid');
+        if (!filtered.length) {
+            grid.innerHTML = `<div class="empty-state"><i class="fas fa-search"></i><p>Koi dashboard nahi mila</p></div>`;
+            return;
+        }
+        grid.innerHTML = filtered.map(d => `
+            <a href="${escHtml(d.url)}" class="dash-card" target="_blank" rel="noopener noreferrer">
+                <div class="dash-accent"></div>
+                <div class="dash-icon-wrap">${d.icon || '📊'}</div>
+                <h3>${escHtml(d.title)}</h3>
+                <p>${escHtml(d.description || 'Click karke dashboard open karein')}</p>
+                <div class="dash-footer">
+                    <span class="dash-tag">${escHtml(d.category || 'General')}</span>
+                    <span class="dash-open"><i class="fas fa-external-link-alt"></i> Open</span>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    async function handleLogin() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const errorDiv = document.getElementById('errorMsg');
+        const btn = document.getElementById('loginBtn');
+
+        errorDiv.style.display = 'none';
+        if (!username || !password) {
+            errorDiv.textContent = '⚠️ Username aur password daalna zaroori hai!';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader"></span> Signing in...';
+
+        try {
+            if (username === MASTER_CREDENTIALS.username && password === MASTER_CREDENTIALS.password) {
+                currentUser = { id: 0, username: 'Sunny', name: 'Sunny Master', role: 'master', dashboard_ids: [], is_active: true };
+                sessionStorage.setItem('colt_session', JSON.stringify(currentUser));
+                recordVisit();
+                await loadDashboards();
                 await loadUsers();
+                showDashboard();
+                btn.disabled = false;
+                btn.innerHTML = 'Sign In →';
+                return;
+            }
+
+            const { data: users, error } = await supabase.from('users').select('*').eq('username', username).eq('password', password).eq('is_active', true);
+            if (error) throw error;
+
+            if (users && users.length > 0) {
+                currentUser = users[0];
+                sessionStorage.setItem('colt_session', JSON.stringify(currentUser));
+                recordVisit();
                 await loadDashboards();
-                const user = allUsers.find(u => u.username === username && u.password === password && u.is_active);
-                
-                if (user) {
-                    currentUser = user;
-                    localStorage.setItem('colt_user', JSON.stringify(currentUser));
-                    // Update traffic stats
-                    todayVisits++;
-                    totalVisits++;
-                    localStorage.setItem('colt_today_visits', todayVisits);
-                    localStorage.setItem('colt_total_visits', totalVisits);
-                    
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('dashboardContainer').style.display = 'block';
-                    initDashboard();
-                } else {
-                    errorDiv.textContent = 'Invalid username or password!';
-                    errorDiv.style.display = 'block';
-                }
+                await loadUsers();
+                showDashboard();
+            } else {
+                errorDiv.textContent = '❌ Invalid username ya password!';
+                errorDiv.style.display = 'block';
             }
-            
-            function initDashboard() {
-                if (!currentUser) return;
-                document.getElementById('userName').textContent = currentUser.name;
-                document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
-                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
-                document.getElementById('greeting').innerHTML = `👋 ${currentUser.name}`;
-                document.getElementById('adminNavItem').style.display = currentUser.role === 'admin' ? 'flex' : 'none';
-                renderHomePage();
-                renderAllDashboards();
-                if (currentUser.role === 'admin') renderUsersTable();
+        } catch(e) {
+            console.error('Login error:', e);
+            errorDiv.textContent = '⚠️ Server error: ' + e.message;
+            errorDiv.style.display = 'block';
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In →';
+    }
+
+    function showDashboard() {
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('dashboardContainer').style.display = 'block';
+        initDashboard();
+    }
+
+    function initDashboard() {
+        if (!currentUser) return;
+        document.getElementById('userName').textContent = currentUser.name;
+        document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
+        document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+        document.getElementById('greeting').textContent = `👋 ${currentUser.name}`;
+        document.getElementById('welcomeMsg').textContent = getWelcomeGreeting();
+        document.getElementById('currentDate').textContent = getFormattedDate();
+
+        const isAdminOrMaster = currentUser.role === 'admin' || currentUser.role === 'master';
+        const isMaster = currentUser.role === 'master';
+
+        document.getElementById('adminNavItem').style.display = 'none';
+        document.getElementById('masterNavItem').style.display = 'none';
+        if (isAdminOrMaster) document.getElementById('adminNavItem').style.display = 'flex';
+        if (isMaster) document.getElementById('masterNavItem').style.display = 'flex';
+
+        showPage('home');
+    }
+
+    window.showPage = function(page) {
+        ['homePage','dashboardsListPage','adminPage','masterPage'].forEach(id => {
+            document.getElementById(id).style.display = 'none';
+        });
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+        const pageMap = {
+            home:       { pageId: 'homePage',          navId: 'navHome',       title: 'Home',         subtitle: 'Welcome to COLT Equipment Portal' },
+            dashboards: { pageId: 'dashboardsListPage', navId: 'navDashboards', title: 'Dashboards',   subtitle: 'Aapke saare dashboards' },
+            admin:      { pageId: 'adminPage',          navId: 'adminNavItem',  title: 'Admin Panel',  subtitle: 'Users aur permissions manage karein' },
+            master:     { pageId: 'masterPage',         navId: 'masterNavItem', title: 'Master Panel', subtitle: 'Dashboards aur system manage karein' }
+        };
+
+        const config = pageMap[page];
+        if (config) {
+            document.getElementById(config.pageId).style.display = 'block';
+            document.getElementById('pageTitle').textContent = config.title;
+            document.getElementById('pageSubtitle').textContent = config.subtitle;
+            const navEl = document.getElementById(config.navId);
+            if (navEl) navEl.classList.add('active');
+        }
+
+        if (page === 'home') renderHomePage();
+        if (page === 'dashboards') renderAllDashboards();
+        if (page === 'admin') renderUsersTable();
+        if (page === 'master') { renderDashboardsTable(); renderMasterUsersTable(); }
+
+        if (window.innerWidth <= 768) document.getElementById('sidebar')?.classList.remove('open');
+    };
+
+    window.logout = function() {
+        sessionStorage.removeItem('colt_session');
+        resetAllState();
+        document.getElementById('dashboardContainer').style.display = 'none';
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('errorMsg').style.display = 'none';
+    };
+
+    function initTheme() {
+        const saved = localStorage.getItem('colt_theme') || 'light';
+        if (saved === 'dark') document.body.classList.add('dark');
+        const icon = document.getElementById('themeIcon');
+        if (icon) icon.className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    window.toggleTheme = function() {
+        const isDark = document.body.classList.toggle('dark');
+        localStorage.setItem('colt_theme', isDark ? 'dark' : 'light');
+        const icon = document.getElementById('themeIcon');
+        if (icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    };
+
+    window.toggleSidebar = function() {
+        document.getElementById('sidebar')?.classList.toggle('open');
+    };
+
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+    }
+
+    async function checkSession() {
+        const saved = sessionStorage.getItem('colt_session');
+        if (!saved) { document.getElementById('loginContainer').style.display = 'flex'; return; }
+
+        try {
+            const parsed = JSON.parse(saved);
+            if (parsed.username === MASTER_CREDENTIALS.username && parsed.role === 'master') {
+                currentUser = { id: 0, username: 'Sunny', name: 'Sunny Master', role: 'master', dashboard_ids: [], is_active: true };
+                await loadDashboards(); await loadUsers();
+                showDashboard(); return;
             }
-            
-            function initTheme() {
-                const saved = localStorage.getItem('colt_theme') || 'light';
-                if (saved === 'dark') document.body.classList.add('dark');
-                document.getElementById('themeIcon').className = saved === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            }
-            window.toggleTheme = () => {
-                const isDark = document.body.classList.contains('dark');
-                if (isDark) document.body.classList.remove('dark');
-                else document.body.classList.add('dark');
-                localStorage.setItem('colt_theme', isDark ? 'light' : 'dark');
-                document.getElementById('themeIcon').className = !isDark ? 'fas fa-sun' : 'fas fa-moon';
-            };
-            
-            function showPage(page) {
-                document.getElementById('homePage').style.display = 'none';
-                document.getElementById('dashboardsListPage').style.display = 'none';
-                document.getElementById('adminPage').style.display = 'none';
-                if (page === 'home') { document.getElementById('homePage').style.display = 'block'; document.getElementById('pageTitle').textContent = 'Home'; document.getElementById('pageSubtitle').textContent = 'Welcome to COLT Equipment Portal'; renderHomePage(); }
-                else if (page === 'dashboards') { document.getElementById('dashboardsListPage').style.display = 'block'; document.getElementById('pageTitle').textContent = 'Dashboards'; document.getElementById('pageSubtitle').textContent = 'All available dashboards'; renderAllDashboards(); }
-                else if (page === 'admin') { document.getElementById('adminPage').style.display = 'block'; document.getElementById('pageTitle').textContent = 'Admin Panel'; document.getElementById('pageSubtitle').textContent = 'Manage users & permissions'; if (currentUser?.role === 'admin') renderUsersTable(); }
-                document.querySelectorAll('.nav-item').forEach((item,i) => { item.classList.remove('active'); if ((page === 'home' && i===0) || (page === 'dashboards' && i===1) || (page === 'admin' && i===2)) item.classList.add('active'); });
-                if (window.innerWidth <= 768) document.getElementById('sidebar')?.classList.remove('open');
-            }
-            
-            window.toggleSidebar = () => document.getElementById('sidebar')?.classList.toggle('open');
-            window.logout = () => { currentUser = null; localStorage.removeItem('colt_user'); document.getElementById('loginContainer').style.display = 'flex'; document.getElementById('dashboardContainer').style.display = 'none'; document.getElementById('username').value = ''; document.getElementById('password').value = ''; };
-            window.showPage = showPage;
-            window.addUser = addUser;
-            window.toggleUserStatus = toggleUserStatus;
-            window.deleteUser = deleteUser;
-            window.openPermissionEditor = openPermissionEditor;
-            
-            document.getElementById('password')?.addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
-            document.getElementById('loginBtn').onclick = handleLogin;
-            
-            async function checkSession() {
-                await loadDashboards();
-                const saved = localStorage.getItem('colt_user');
-                if (saved) {
-                    await loadUsers();
-                    currentUser = JSON.parse(saved);
-                    const valid = allUsers.find(u => u.id === currentUser.id && u.is_active);
-                    if (valid) {
-                        currentUser = valid;
-                        document.getElementById('loginContainer').style.display = 'none';
-                        document.getElementById('dashboardContainer').style.display = 'block';
-                        initDashboard();
-                    } else localStorage.removeItem('colt_user');
-                }
-            }
-            
-            initTheme();
-            checkSession();
-            
-            window.handleLogin = handleLogin;
-        })();
-    </script>
+
+            const { data: users, error } = await supabase.from('users').select('*').eq('id', parsed.id).eq('is_active', true);
+            if (error || !users || users.length === 0) throw new Error('Invalid session');
+
+            currentUser = users[0];
+            sessionStorage.setItem('colt_session', JSON.stringify(currentUser));
+            await loadDashboards(); await loadUsers();
+            showDashboard();
+        } catch(e) {
+            sessionStorage.removeItem('colt_session');
+            resetAllState();
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('dashboardContainer').style.display = 'none';
+        }
+    }
+
+    document.getElementById('password')?.addEventListener('keypress', e => {
+        if (e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('loginBtn').onclick = handleLogin;
+
+    initTheme();
+    checkSession();
+})();
+</script>
 </body>
 </html>
